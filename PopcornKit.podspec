@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "PopcornKit"
-  s.version = "1.1.0.3"
+  s.version = "1.1.0.5"
   s.summary = "The backend for the PopcornTime tvOS App"
   s.homepage = "https://github.com/PopcornTimeTV/PopcornKit"
   s.license = 'MIT'
@@ -18,4 +18,5 @@ Pod::Spec.new do |s|
   s.dependency 'Alamofire'
   s.dependency 'ObjectMapper'
   s.dependency 'SWXMLHash'
+  s.dependency 'AKTrakt'
 end
