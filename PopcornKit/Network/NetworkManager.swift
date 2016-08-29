@@ -33,7 +33,7 @@ private struct Trakt {
     static let People = "/people/"
     static let Season = "/seasons/"
     static let Episodes = "/episodes/"
-    static let Parameters = ["extended" : "images"]
+    static let Parameters = ["extended" : "images,episodes"]
     static let Headers = [
         "Content-Type": "application/json",
         "trakt-api-version": "2",
@@ -286,7 +286,7 @@ public class NetworkManager {
         
         var actorString = "http://www.imdb.com/xml/name?json=1&nr=1&nm=on&q="+actorName
         actorString = actorString.stringByReplacingOccurrencesOfString(" ", withString: "+")
-        actorString = actorString.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.alphanumericCharacterSet())!
+        actorString = actorString.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
         
         
         self.manager.request(.GET, actorString, parameters: nil) // Get fucking IMDB ID of Actor/Director
@@ -528,8 +528,8 @@ public class NetworkManager {
         }
     }
     
-    public func fetchTraktSeasonEpisodesInfoForIMDB(imdbSlug: String, season: Int, completion: ((response: [[String : AnyObject]]?, error: NSError?) -> Void)?) {
-        self.manager.request(.GET, Trakt.Base + Trakt.Shows + imdbSlug + Trakt.Season + String(season) + Trakt.Episodes, parameters: Trakt.Parameters, encoding: .URL, headers: Trakt.Headers)
+    public func fetchTraktSeasonEpisodesInfoForIMDB(imdbID: String, season: Int, completion: ((response: [[String : AnyObject]]?, error: NSError?) -> Void)?) {
+        self.manager.request(.GET, Trakt.Base + Trakt.Shows + imdbID + Trakt.Season + String(season), parameters: Trakt.Parameters, encoding: .URL, headers: Trakt.Headers)
             .responseJSON { response in
                 if let data = response.result.value as? [[String : AnyObject]] {
                     completion?(response: data, error: nil)
