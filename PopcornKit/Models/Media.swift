@@ -1,14 +1,11 @@
 
 
 import Foundation
+import ObjectMapper
 
-protocol Media {
+protocol Media: Mappable {
     var title: String! { get set }
     var summary: String! { get set }
-    var torrents: [Torrent]! { get set }
-    var currentTorrent: Torrent! { get set }
-    var subtitles: [Subtitle]? { get set }
-    var currentSubtitle: Subtitle? { get set }
     var smallBackgroundImage: String? { get }
     var mediumBackgroundImage: String? { get }
     var largeBackgroundImage: String? { get set }

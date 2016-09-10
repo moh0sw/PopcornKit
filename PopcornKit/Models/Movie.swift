@@ -3,7 +3,7 @@
 import Foundation
 import ObjectMapper
 
-public struct Movie: Media, Mappable, Equatable {
+public struct Movie: Media, Equatable {
 
     public var id: String!
     public var slug: String! {get {return title.slugged} set {}}
@@ -15,8 +15,7 @@ public struct Movie: Media, Mappable, Equatable {
     public var summary: String!
     public var trailer: String?
     public var trailerCode: String? {
-        guard let trailer = trailer, let code = trailer.sliceFrom("?v=", to: "") else { return nil }
-        return code
+        return trailer?.sliceFrom("?v=", to: "")
     }
     public var certification: String!
     
@@ -38,7 +37,7 @@ public struct Movie: Media, Mappable, Equatable {
     public var directors: [Crew] {return crew.filter({$0.roleType == .Director})}
     public var crew: [Crew]!
     public var actors: [Actor]!
-    public var torrents: [Torrent]!
+    public var torrents = [Torrent]()
     public var currentTorrent: Torrent!
     public var subtitles: [Subtitle]?
     public var currentSubtitle: Subtitle?
@@ -59,6 +58,15 @@ public struct Movie: Media, Mappable, Equatable {
         self.summary <- map["synopsis"]
         self.largeCoverImage <- map["images.poster"]
         self.largeBackgroundImage <- map["images.fanart"]
+        if let torrents = map["torrents.en"].currentValue as? [String: [String: AnyObject]] {
+            for (quality, torrent) in torrents {
+                if var torrent = Mapper<Torrent>().map(torrent) where quality != "0" {
+                    torrent.quality = quality
+                    self.torrents.append(torrent)
+                }
+            }
+        }
+        torrents.sortInPlace(<)
     }
 
 }

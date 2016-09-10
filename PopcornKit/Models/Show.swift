@@ -3,7 +3,7 @@
 import Foundation
 import ObjectMapper
 
-public struct Show: Media, Mappable, Equatable {
+public struct Show: Media, Equatable {
     
     public var id: String!
     public var slug: String!
@@ -34,9 +34,10 @@ public struct Show: Media, Mappable, Equatable {
     public var directors: [Crew] {return crew.filter({$0.roleType == .Director})}
     public var crew: [Crew]!
     public var actors: [Actor]!
+    public var episodes: [Episode]!
     
     public init?(_ map: Map) {
-        guard map["imdb_id"].currentValue != nil && map["title"].currentValue != nil && map["year"].currentValue != nil && map["slug"].currentValue != nil && map["images.fanart"].currentValue != nil && map["num_seasons"].currentValue != nil && map["rating.percentage"].currentValue != nil else {return nil}
+        guard map["imdb_id"].currentValue != nil && map["title"].currentValue != nil && map["year"].currentValue != nil && map["slug"].currentValue != nil && map["num_seasons"].currentValue != nil && map["rating.percentage"].currentValue != nil else {return nil}
     }
     
     public mutating func mapping(map: Map) {
@@ -52,6 +53,8 @@ public struct Show: Media, Mappable, Equatable {
         self.summary <- map["synopsis"]
         self.largeCoverImage <- map["images.poster"]
         self.largeBackgroundImage <- map["images.fanart"]
+        self.episodes <- map["episodes"]
+        episodes.sortInPlace({ $0.episode < $1.episode })
     }
 }
 

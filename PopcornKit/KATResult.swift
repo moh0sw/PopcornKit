@@ -22,10 +22,10 @@ public struct KATResult: Mappable, Equatable {
         self.title <- map["title"]
         self.titleLong <- map["title"]
         
-        var torrent = Torrent.init(map)
-        torrent.mapping(map)
-        self.torrents = [torrent]
-        self.dateUploaded <- map["pubDate"] //(map["date_uploaded_unix"], DateTransform())
+//        var torrent = Torrent.init(map)
+//        torrent.mapping(map)
+//        self.torrents = [torrent]
+//        self.dateUploaded <- map["pubDate"] //(map["date_uploaded_unix"], DateTransform())
     }
     
 }

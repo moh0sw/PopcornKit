@@ -76,21 +76,20 @@ public struct Torrent: Mappable, Equatable, Comparable {
     public var quality: String!
     public var seeds: Int!
     public var peers: Int!
-    public var size: String!
-    public var sizeBytes: Int!
+    public var size: String?
+    public var sizeBytes: Int?
     
     public init?(_ map: Map) {
-        guard let quality = map.JSONDictionary.keys.first where quality != "0" && map["quality.url"].currentValue != nil && map["quality.seeds"].currentValue != nil && map["quality.seeds"].currentValue != nil && map["quality.filesize"].currentValue != nil && map["quality.size"].currentValue != nil else {return nil}
-        self.quality = quality
+        guard map["url"].currentValue != nil && (map["seeds"].currentValue != nil || map["seed"].currentValue != nil) && (map["peers"].currentValue != nil || map["peer"].currentValue != nil) else {return nil}
     }
     
     public mutating func mapping(map: Map) {
-        self.url <- map["quality.url"]
+        self.url <- map["url"]
         self.hash = url.containsString("https://") ? url : url.sliceFrom("magnet:?xt=urn:btih:", to: url.containsString("&dn=") ? "&dn=" : "")
-        self.seeds <- map["quality.seeds"]
-        self.peers <- map["quality.peers"]
-        self.size <- map["quality.filesize"]
-        self.sizeBytes <- map["quality.size"]
+        self.seeds <- map["seeds"]; seeds = seeds ?? map["seed"].currentValue as? Int ?? 0
+        self.peers <- map["peers"]; peers = peers ?? map["peer"].currentValue as? Int ?? 0
+        self.size <- map["filesize"]
+        self.sizeBytes <- map["size"]
     }
 }
 

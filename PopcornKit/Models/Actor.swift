@@ -3,7 +3,7 @@
 import Foundation
 import ObjectMapper
 
-public struct Actor: Person, Mappable, Equatable {
+public struct Actor: Person, Equatable {
 
     public var name: String!
     public var characterName: String!
