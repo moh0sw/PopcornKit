@@ -1,108 +1,60 @@
+
+
 import Foundation
 import ObjectMapper
 
-public struct ShowRating: Mappable {
-    
-    public var hated: Int!
-    public var loved: Int!
-    public var percentage: Int!
-    public var votes: Int!
-    public var watching: Int!
-    
-    public init(_ map: Map) {
-        
-    }
-    
-    public mutating func mapping(map: Map) {
-        self.hated <- map["hated"]
-        self.loved <- map["loved"]
-        self.percentage <- map["percentage"]
-        self.votes <- map["votes"]
-        self.watching <- map["watching"]
-    }
-}
-
-public struct Show: Mappable, Equatable {
+public struct Show: Media, Mappable, Equatable {
     
     public var id: String!
-    
-    public var bannerImage: String!
-    public var fanartImage: String!
-    public var posterImage: String!
-    
-    public var imdbId: Int!
-    
-    public var lastUpdated: NSDate!
-    
-    public var numberOfSeasons: Int!
-    
-    public var rating: ShowRating!
-    
     public var slug: String!
     public var title: String!
-    
-    public var tvdbId: Int!
-    
     public var year: String!
+    public var rating: Float!
+    public var runtime: String!
+    public var genres: [String]!
+    public var summary: String!
+    public var status: String!
+    public var numberOfSeasons: Int!
     
-    // Only used when fetching info from episodes
-    public var airDay: String!
-    public var airTime: String!
-    public var synopsis: String?
+    public var smallBackgroundImage: String? {
+        return largeBackgroundImage?.stringByReplacingOccurrencesOfString("original", withString: "thumb")
+    }
+    public var mediumBackgroundImage: String? {
+        return largeBackgroundImage?.stringByReplacingOccurrencesOfString("original", withString: "medium")
+    }
+    public var largeBackgroundImage: String?
+    public var smallCoverImage: String? {
+        return largeCoverImage?.stringByReplacingOccurrencesOfString("original", withString: "thumb")
+    }
+    public var mediumCoverImage: String? {
+        return largeCoverImage?.stringByReplacingOccurrencesOfString("original", withString: "medium")
+    }
+    public var largeCoverImage: String?
     
-    // Only used when searching EZTV
-    public var episodes: [Episode]!
+    public var directors: [Crew] {return crew.filter({$0.roleType == .Director})}
+    public var crew: [Crew]!
+    public var actors: [Actor]!
     
-    public init(_ map: Map) {
-        
+    public init?(_ map: Map) {
+        guard map["imdb_id"].currentValue != nil && map["title"].currentValue != nil && map["year"].currentValue != nil && map["slug"].currentValue != nil && map["images.fanart"].currentValue != nil && map["num_seasons"].currentValue != nil && map["rating.percentage"].currentValue != nil else {return nil}
     }
     
     public mutating func mapping(map: Map) {
-        self.id <- map["_id"]
-        
-        self.bannerImage <- map["images.banner"]
-        self.fanartImage <- map["images.fanart"]
-        self.posterImage <- map["images.poster"]
-        self.posterImage = self.posterImage.stringByReplacingOccurrencesOfString("original", withString: "thumb")
-        
-        self.imdbId <- (map["imdb_id"], TransformOf<Int, String>(fromJSON: { Int($0!) }, toJSON: { $0.map { String($0) } }))
-        
-        self.lastUpdated <- (map["last_updated"], DateTransform())
-        
-        self.numberOfSeasons <- map["num_seasons"]
-        
-        self.rating <- map["rating"]
-        
-        self.slug <- map["slug"]
+        self.id <- map["imdb_id"]
         self.title <- map["title"]
-        
-        //        self.tvdbId <- (map["tvdb_id"], TransformOf<Int, String>(fromJSON: { Int(id!) }, toJSON: { $0.map { String($0) } }))
-        self.tvdbId <- (map["tvdb_id"], TransformOf<Int, String>(fromJSON: { string -> Int? in
-            if let string = string {
-                return Int(string)
-            }
-            return 0
-            }, toJSON: { int -> String? in
-                return String(int)
-        }))
-        
         self.year <- map["year"]
-        
-        self.airDay <- map["air_day"]
-        self.airTime <- map["air_time"]
-        self.synopsis <- map["synopsis"]
-        if self.synopsis == nil{self.synopsis=""}
+        self.slug <- map["slug"]
+        self.status <- map["status"]
+        self.numberOfSeasons <- map["num_seasons"]
+        self.rating <- map["rating.percentage"]
+        self.runtime <- map["runtime"]
+        self.genres <- map["genres"]
+        self.summary <- map["synopsis"]
+        self.largeCoverImage <- map["images.poster"]
+        self.largeBackgroundImage <- map["images.fanart"]
     }
 }
 
 public func == (lhs: Show, rhs: Show) -> Bool {
     return lhs.id == rhs.id
-}
-
-public func > (lhs: Show, rhs: Show) -> Bool {
-    return lhs.id > rhs.id
-}
-
-public func < (lhs: Show, rhs: Show) -> Bool {
-    return lhs.id < rhs.id
 }

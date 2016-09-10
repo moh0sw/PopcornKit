@@ -1,24 +1,32 @@
+
+
 import Foundation
 import ObjectMapper
 
-public struct Actor: Mappable {
+public struct Actor: Person, Mappable, Equatable {
 
     public var name: String!
     public var characterName: String!
-    public var mediumImage: String!
-    public var smallImage: String!
-    public var imdbCode: Int!
+    public var mediumImage: String?
+    public var smallImage: String?
+    public var largeImage: String?
+    public var imdbId: String!
 
-    public init(_ map: Map) {
-
+    public init?(_ map: Map) {
+        guard map["character"].currentValue != nil && map["person.name"].currentValue != nil && map["person.ids.imdb"].currentValue != nil  else {return nil}
     }
 
     public mutating func mapping(map: Map) {
-        self.name <- map["name"]
-        self.characterName <- map["character_name"]
-        self.mediumImage <- map["medium_image"]
-        self.smallImage <- map["small_image"]
-        self.imdbCode <- map["imdb_code"]
+        self.name <- map["person.name"]
+        self.characterName <- map["character"]
+        self.largeImage <- map["person.images.headshot.full"]
+        self.mediumImage <- map["person.images.headshot.medium"]
+        self.smallImage <- map["person.images.headshot.thumb"]
+        self.imdbId <- map["person.ids.imdb"]
     }
+    
+}
 
+public func ==(rhs: Actor, lhs: Actor) -> Bool {
+    return rhs.imdbId == lhs.imdbId
 }

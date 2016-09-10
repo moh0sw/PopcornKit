@@ -1,107 +1,68 @@
+
+
 import Foundation
 import ObjectMapper
 
-public struct Movie: Mappable, Equatable {
+public struct Movie: Media, Mappable, Equatable {
 
-    public var id: Int!
-    public var imdbId: String!
-    public var url: String!
+    public var id: String!
+    public var slug: String! {get {return title.slugged} set {}}
     public var title: String!
-    public var titleEnglish: String!
-    public var titleLong: String!
-    public var slug: String!
-    public var year: Int!
+    public var year: String!
     public var rating: Float!
-    public var runtime: Int!
+    public var runtime: String!
     public var genres: [String]!
     public var summary: String!
-    public var descriptionFull: String!
-    public var ytTrailerCode: String!
-    public var youtubeTrailerURL: String { get { return "https://www.youtube.com/watch?v=" + self.ytTrailerCode } }
-    public var language: String!
+    public var trailer: String?
+    public var trailerCode: String? {
+        guard let trailer = trailer, let code = trailer.sliceFrom("?v=", to: "") else { return nil }
+        return code
+    }
+    public var certification: String!
+    
+    public var smallBackgroundImage: String? {
+        return largeBackgroundImage?.stringByReplacingOccurrencesOfString("original", withString: "thumb")
+    }
+    public var mediumBackgroundImage: String? {
+        return largeBackgroundImage?.stringByReplacingOccurrencesOfString("original", withString: "medium")
+    }
+    public var largeBackgroundImage: String?
+    public var smallCoverImage: String? {
+        return largeCoverImage?.stringByReplacingOccurrencesOfString("original", withString: "thumb")
+    }
+    public var mediumCoverImage: String? {
+        return largeCoverImage?.stringByReplacingOccurrencesOfString("original", withString: "medium")
+    }
+    public var largeCoverImage: String?
 
-    public var mpaRating: String!
-    public var tomatoesCriticsRating: String!
-    public var tomatoesCriticsScore: Int!
-    public var tomatoesAudienceRating: String!
-    public var tomatoesAudienceScore: Int!
-
-    public var backgroundImage: String!
-    public var smallCoverImage: String!
-    public var mediumCoverImage: String!
-    public var largeCoverImage: String!
-    public var dateUploaded: NSDate!
-
-    public var directors: [Director]!
+    public var directors: [Crew] {return crew.filter({$0.roleType == .Director})}
+    public var crew: [Crew]!
     public var actors: [Actor]!
     public var torrents: [Torrent]!
+    public var currentTorrent: Torrent!
+    public var subtitles: [Subtitle]?
+    public var currentSubtitle: Subtitle?
 
-    public init(_ map: Map) {
-
+    public init?(_ map: Map) {
+        guard map["imdb_id"].currentValue != nil && map["title"].currentValue != nil && map["year"].currentValue != nil && map["rating.percentage"].currentValue != nil && map["runtime"].currentValue != nil && map["certification"].currentValue != nil && map["genres"].currentValue != nil && map["synopsis"].currentValue != nil else {return nil}
     }
 
     public mutating func mapping(map: Map) {
-        self.id <- map["id"]
-        self.imdbId <- map["imdb_code"]
-        self.url <- map["url"]
+        self.id <- map["imdb_id"]
         self.title <- map["title"]
-        self.titleEnglish <- map["title_english"]
-        self.titleLong <- map["title_long"]
-        self.slug <- map["slug"]
         self.year <- map["year"]
-        self.rating <- map["rating"]
+        self.rating <- map["rating.percentage"]
         self.runtime <- map["runtime"]
+        self.trailer <- map["trailer"]
+        self.certification <- map["certification"]
         self.genres <- map["genres"]
-        self.summary <- map["description_intro"]
-        self.descriptionFull <- map["description_full"]
-        self.ytTrailerCode <- map["yt_trailer_code"]
-        self.language <- map["language"]
-
-        self.mpaRating <- map["mpa_rating"]
-        self.tomatoesCriticsRating <- map["rt_critics_rating"]
-        self.tomatoesCriticsScore <- map["rt_critics_score"]
-        self.tomatoesAudienceRating <- map["rt_audience_rating"]
-        self.tomatoesAudienceScore <- map["rt_audience_score"]
-
-        // Hacky-ness
-        self.backgroundImage <- map["images.background_image"]
-        if self.backgroundImage == nil {
-            self.backgroundImage <- map["background_image"]
-        }
-
-        self.smallCoverImage <- map["images.small_cover_image"]
-        if self.smallCoverImage == nil {
-            self.smallCoverImage <- map["small_cover_image"]
-        }
-
-        self.mediumCoverImage <- map["images.medium_cover_image"]
-        if self.mediumCoverImage == nil {
-            self.mediumCoverImage <- map["medium_cover_image"]
-        }
-
-        self.largeCoverImage <- map["images.large_cover_image"]
-        if self.largeCoverImage == nil {
-            self.largeCoverImage <- map["large_cover_image"]
-        }
-
-        self.directors <- map["directors"]
-        self.actors <- map["actors"]
-        self.torrents <- map["torrents"]
-        self.dateUploaded <- map["date_uploaded"] //(map["date_uploaded_unix"], DateTransform())
+        self.summary <- map["synopsis"]
+        self.largeCoverImage <- map["images.poster"]
+        self.largeBackgroundImage <- map["images.fanart"]
     }
 
 }
 
-// MARK: Equatable
-
-public func == (lhs: Movie, rhs: Movie) -> Bool {
+public func ==(lhs: Movie, rhs: Movie) -> Bool {
     return lhs.id == rhs.id
-}
-
-public func < (lhs: Movie, rhs: Movie) -> Bool {
-    return lhs.id < rhs.id
-}
-
-public func > (lhs: Movie, rhs: Movie) -> Bool {
-    return lhs.id > rhs.id
 }

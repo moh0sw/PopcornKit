@@ -35,11 +35,3 @@ public struct KATResult: Mappable, Equatable {
 public func == (lhs: KATResult, rhs: KATResult) -> Bool {
     return lhs.id == rhs.id
 }
-
-public func < (lhs: KATResult, rhs: KATResult) -> Bool {
-    return lhs.id < rhs.id
-}
-
-public func > (lhs: KATResult, rhs: KATResult) -> Bool {
-    return lhs.id > rhs.id
-}
