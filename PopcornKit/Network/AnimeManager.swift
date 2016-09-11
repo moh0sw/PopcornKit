@@ -1,16 +1,15 @@
 
 
 import Foundation
-import Alamofire
 import ObjectMapper
 
-class AnimeManager: NetworkManager {
+public class AnimeManager: NetworkManager {
     
     /// Creates new instance of AnimeManager class
-    static let sharedManager = AnimeManager()
+    public static let sharedManager = AnimeManager()
     
     /// Possible genres used in API call.
-    enum genres: String {
+    public enum genres: String {
         case All = "All"
         case Action = "Action"
         case Adventure = "Adventure"
@@ -58,7 +57,7 @@ class AnimeManager: NetworkManager {
     }
     
     /// Possible filters used in API call.
-    enum filters: String {
+    public enum filters: String {
         case Popularity = "popularity"
         case Year = "year"
         case Date = "updated"
@@ -90,18 +89,18 @@ class AnimeManager: NetworkManager {
      - Parameter filterBy:   Sort the response by Popularity, Year, Date Rating, Alphabet or Trending.
      - Paramter genre:       Only return anime that match the provided genre.
      - Parameter searchTerm: Only return animes that match the provided string.
-     - Parameter order:      Ascending or descending.
+     - Parameter orderBy:    Ascending or descending.
      
      - Parameter completion: Completion handler for the request. Returns array of animes upon success, error upon failure.
      */
-    func load(
+    public func load(
         page: Int,
-        filterBy: filters,
+        filterBy filter: filters,
         genre: genres = .All,
         searchTerm: String? = nil,
-        order: orders = .Descending,
+        orderBy order: orders = .Descending,
         completion: (shows: [Show]?, error: NSError?) -> Void) {
-        var params: [String: AnyObject] = ["sort": filterBy.rawValue, "type": genre.rawValue, "order": order.rawValue]
+        var params: [String: AnyObject] = ["sort": filter.rawValue, "type": genre.rawValue, "order": order.rawValue]
         if let searchTerm = searchTerm  where !searchTerm.isEmpty {
             params["keywords"] = searchTerm
         }
@@ -118,7 +117,7 @@ class AnimeManager: NetworkManager {
      
      - Parameter completion:    Completion handler for the request. Returns show upon success, error upon failure.
      */
-    func getAnimeInfo(id: String, completion: (show: Show?, error: NSError?) -> Void) {
+    public func getInfo(id: String, completion: (show: Show?, error: NSError?) -> Void) {
         self.manager.request(.GET, Popcorn.Base + Popcorn.Anime + "/\(id)").validate().responseJSON { response in
             guard let value = response.result.value else {completion(show: nil, error: response.result.error); return}
             completion(show: Mapper<Show>().map(value), error: nil)

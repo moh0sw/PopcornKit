@@ -3,13 +3,13 @@
 import Foundation
 import ObjectMapper
 
-class MovieManager: NetworkManager {
+public class MovieManager: NetworkManager {
     
     /// Creates new instance of MovieManager class
-    static let sharedManager = MovieManager()
+    public static let sharedManager = MovieManager()
     
     /// Possible genres used in API call.
-    enum genres: String {
+    public enum genres: String {
         case All = "All"
         case Action = "Action"
         case Adventure = "Adventure"
@@ -44,7 +44,7 @@ class MovieManager: NetworkManager {
     }
     
     /// Possible filters used in API call.
-    enum filters: String {
+    public enum filters: String {
         case Trending = "trending"
         case Popularity = "seeds"
         case Rating = "rating"
@@ -79,18 +79,18 @@ class MovieManager: NetworkManager {
      - Parameter filterBy:   Sort the response by Popularity, Year, Date Rating, Alphabet or Trending.
      - Paramter genre:       Only return movies that match the provided genre.
      - Parameter searchTerm: Only return movies that match the provided string.
-     - Parameter order:      Ascending or descending.
+     - Parameter orderBy:    Ascending or descending.
      
      - Parameter completion: Completion handler for the request. Returns array of movies upon success, error upon failure.
      */
-    func load(
+    public func load(
         page: Int,
-        filterBy: filters,
+        filterBy filter: filters,
         genre: genres = .All,
         searchTerm: String? = nil,
-        order: orders = .Descending,
+        orderBy order: orders = .Descending,
         completion: (movies: [Movie]?, error: NSError?) -> Void) {
-        var params: [String: AnyObject] = ["sort": filterBy.rawValue, "order": order.rawValue, "genre": genre.rawValue.stringByReplacingOccurrencesOfString(" ", withString: "-").lowercaseString]
+        var params: [String: AnyObject] = ["sort": filter.rawValue, "order": order.rawValue, "genre": genre.rawValue.stringByReplacingOccurrencesOfString(" ", withString: "-").lowercaseString]
         if let searchTerm = searchTerm where !searchTerm.isEmpty {
             params["keywords"] = searchTerm
         }
@@ -109,7 +109,7 @@ class MovieManager: NetworkManager {
      
      - Parameter completion:    Completion handler for the request. Returns movie upon success, error upon failure.
      */
-    func getMovieInfo(imdbId: String, completion: (movie: Movie?, error: NSError?) -> Void) {
+    public func getInfo(imdbId: String, completion: (movie: Movie?, error: NSError?) -> Void) {
         self.manager.request(.GET, Popcorn.Base + Popcorn.Movie + "/\(imdbId)").validate().responseJSON { response in
             guard let value = response.result.value else {completion(movie: nil, error: response.result.error); return}
             completion(movie: Mapper<Movie>().map(value), error: nil)

@@ -82,7 +82,7 @@ public class NetworkManager {
     }()
     
     /// Possible orders used in API call.
-    enum orders: Int {
+    public enum orders: Int {
         case Ascending = 1
         case Descending = -1
         

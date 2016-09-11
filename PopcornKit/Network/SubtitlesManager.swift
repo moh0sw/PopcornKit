@@ -4,10 +4,10 @@ import Foundation
 import AlamofireXMLRPC
 import Alamofire
 
-class OpenSubtitles {
+public class SubtitlesManager {
     
-    /// Creates new instance of OpenSubtitles class
-    static let sharedManager = OpenSubtitles()
+    /// Creates new instance of SubtitlesManager class
+    public static let sharedManager = SubtitlesManager()
     
     // MARK: - Private Variables.
     
@@ -28,7 +28,7 @@ class OpenSubtitles {
      
      - Parameter completion:    Completion handler called with array of subtitles and an optional error.
      */
-    func search(episode: Episode? = nil, imdbId: String? = nil, limit: String = "300", completion:(subtitles: [Subtitle], error: NSError?) -> Void) {
+    public func search(episode: Episode? = nil, imdbId: String? = nil, limit: String = "300", completion:(subtitles: [Subtitle], error: NSError?) -> Void) {
         var params: XMLRPCStructure = ["sublanguageid": "all"]
         if let imdbId = imdbId {
             params["imdbid"] = imdbId.stringByReplacingOccurrencesOfString("tt", withString: "")
@@ -63,7 +63,7 @@ class OpenSubtitles {
      - Parameter completion:    Optional completion handler called when request is sucessfull.
      - Parameter error:         Optional error completion handler called when request fails or username/password is incorrect.
      */
-    func login(completion:(() -> Void)?, error:((error: NSError) -> Void)? = nil) {
+    public func login(completion:(() -> Void)?, error:((error: NSError) -> Void)? = nil) {
         var username = ""
         var password = ""
         if let credential = NSURLCredentialStorage.sharedCredentialStorage().credentialsForProtectionSpace(protectionSpace)?.values.first {
