@@ -89,18 +89,14 @@ class ShowManager: NetworkManager {
         genre: genres = .All,
         searchTerm: String? = nil,
         order: orders = .Descending,
-        completion: ((shows: [Show]?, error: NSError?) -> Void)?) {
+        completion: (shows: [Show]?, error: NSError?) -> Void) {
         var params: [String: AnyObject] = ["sort": filterBy.rawValue, "genre": genre.rawValue.stringByReplacingOccurrencesOfString(" ", withString: "-").lowercaseString, "order": order.rawValue]
         if let searchTerm = searchTerm where !searchTerm.isEmpty {
             params["keywords"] = searchTerm
         }
-        self.manager.request(.GET, Popcorn.Base + Popcorn.Shows + "\(page)", parameters: params).validate().responseJSON { response in
-            guard let value = response.result.value else {
-                completion?(shows: nil, error: response.result.error)
-                print("Error is: \(response.result.error!)")
-                return
-            }
-            completion?(shows: Mapper<Show>().mapArray(value), error: nil)
+        self.manager.request(.GET, Popcorn.Base + Popcorn.Shows + "/\(page)", parameters: params).validate().responseJSON { response in
+            guard let value = response.result.value else {completion(shows: nil, error: response.result.error); return}
+            completion(shows: Mapper<Show>().mapArray(value), error: nil)
         }
     }
     
@@ -111,14 +107,10 @@ class ShowManager: NetworkManager {
      
      - Parameter completion:    Completion handler for the request. Returns show upon success, error upon failure.
      */
-    func getShowInfo(imdbId: String, completion: ((show: Show?, error: NSError?) -> Void)?) {
-        self.manager.request(.GET, Popcorn.Base + Popcorn.Show + "\(imdbId)").validate().responseJSON { response in
-            guard let value = response.result.value else {
-                completion?(show: nil, error: response.result.error)
-                print("Error is: \(response.result.error!)")
-                return
-            }
-            completion?(show: Mapper<Show>().map(value), error: nil)
+    func getShowInfo(imdbId: String, completion: (show: Show?, error: NSError?) -> Void) {
+        self.manager.request(.GET, Popcorn.Base + Popcorn.Show + "/\(imdbId)").validate().responseJSON { response in
+            guard let value = response.result.value else {completion(show: nil, error: response.result.error); return}
+            completion(show: Mapper<Show>().map(value), error: nil)
         }
     }
 }

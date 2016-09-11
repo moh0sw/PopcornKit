@@ -37,23 +37,35 @@ public struct Show: Media, Equatable {
     public var episodes: [Episode]!
     
     public init?(_ map: Map) {
-        guard map["imdb_id"].currentValue != nil && map["title"].currentValue != nil && map["year"].currentValue != nil && map["slug"].currentValue != nil && map["num_seasons"].currentValue != nil && map["rating.percentage"].currentValue != nil else {return nil}
+        guard (map["imdb_id"].currentValue != nil || map["ids.imdb"].currentValue != nil) && map["title"].currentValue != nil && map["year"].currentValue != nil && (map["slug"].currentValue != nil || map["ids.slug"].currentValue != nil) && (map["rating"].currentValue != nil || map["rating.percentage"].currentValue != nil) else {return nil}
     }
     
     public mutating func mapping(map: Map) {
+        if map.context is TraktContext {
+            self.id <- map["ids.imdb"]
+            self.slug <- map["ids.slug"]
+            self.year <- (map["year"], TransformOf<String, Int>(fromJSON: { String($0!) }, toJSON: { Int($0!)}))
+            self.rating <- map["rating"]
+            self.largeCoverImage <- map["images.poster.full"]
+            self.largeBackgroundImage <- map["images.fanart.full"]
+        } else {
+            self.id <- map["imdb_id"]
+            self.year <- map["year"]
+            self.rating <- map["rating.percentage"]
+            self.largeCoverImage <- map["images.poster"]
+            self.largeBackgroundImage <- map["images.fanart"]
+            self.slug <- map["slug"]
+        }
+        self.summary <- map["synopsis"]
         self.id <- map["imdb_id"]
         self.title <- map["title"]
         self.year <- map["year"]
-        self.slug <- map["slug"]
         self.status <- map["status"]
         self.numberOfSeasons <- map["num_seasons"]
-        self.rating <- map["rating.percentage"]
         self.runtime <- map["runtime"]
         self.genres <- map["genres"]
-        self.summary <- map["synopsis"]
-        self.largeCoverImage <- map["images.poster"]
-        self.largeBackgroundImage <- map["images.fanart"]
         self.episodes <- map["episodes"]
+        self.runtime <- map["runtime"]
         episodes.sortInPlace({ $0.episode < $1.episode })
     }
 }

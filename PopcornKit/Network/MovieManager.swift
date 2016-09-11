@@ -89,18 +89,17 @@ class MovieManager: NetworkManager {
         genre: genres = .All,
         searchTerm: String? = nil,
         order: orders = .Descending,
-        completion: ((movies: [Movie]?, error: NSError?) -> Void)?) {
+        completion: (movies: [Movie]?, error: NSError?) -> Void) {
         var params: [String: AnyObject] = ["sort": filterBy.rawValue, "order": order.rawValue, "genre": genre.rawValue.stringByReplacingOccurrencesOfString(" ", withString: "-").lowercaseString]
         if let searchTerm = searchTerm where !searchTerm.isEmpty {
             params["keywords"] = searchTerm
         }
-        self.manager.request(.GET, Popcorn.Base + Popcorn.Movies + "\(page)", parameters: params).validate().responseJSON { response in
+        self.manager.request(.GET, Popcorn.Base + Popcorn.Movies + "/\(page)", parameters: params).validate().responseJSON { response in
             guard let value = response.result.value else {
-                completion?(movies: nil, error: response.result.error)
-                print("Error is: \(response.result.error!)")
+                completion(movies: nil, error: response.result.error)
                 return
             }
-            completion?(movies: Mapper<Movie>().mapArray(value), error: nil)
+            completion(movies: Mapper<Movie>().mapArray(value), error: nil)
         }
     }
     /**
@@ -110,14 +109,10 @@ class MovieManager: NetworkManager {
      
      - Parameter completion:    Completion handler for the request. Returns movie upon success, error upon failure.
      */
-    func getMovieInfo(imdbId: String, completion: ((movie: Movie?, error: NSError?) -> Void)?) {
-        self.manager.request(.GET, Popcorn.Base + Popcorn.Movie + "\(imdbId)").validate().responseJSON { response in
-            guard let value = response.result.value else {
-                completion?(movie: nil, error: response.result.error)
-                print("Error is: \(response.result.error!)")
-                return
-            }
-            completion?(movie: Mapper<Movie>().map(value), error: nil)
+    func getMovieInfo(imdbId: String, completion: (movie: Movie?, error: NSError?) -> Void) {
+        self.manager.request(.GET, Popcorn.Base + Popcorn.Movie + "/\(imdbId)").validate().responseJSON { response in
+            guard let value = response.result.value else {completion(movie: nil, error: response.result.error); return}
+            completion(movie: Mapper<Movie>().map(value), error: nil)
         }
     }
     

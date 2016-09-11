@@ -6,7 +6,7 @@ import ObjectMapper
 public struct Movie: Media, Equatable {
 
     public var id: String!
-    public var slug: String! {get {return title.slugged} set {}}
+    public var slug: String! {get {return "\(title.slugged)-\(year)"} set {}}
     public var title: String!
     public var year: String!
     public var rating: Float!
@@ -43,21 +43,31 @@ public struct Movie: Media, Equatable {
     public var currentSubtitle: Subtitle?
 
     public init?(_ map: Map) {
-        guard map["imdb_id"].currentValue != nil && map["title"].currentValue != nil && map["year"].currentValue != nil && map["rating.percentage"].currentValue != nil && map["runtime"].currentValue != nil && map["certification"].currentValue != nil && map["genres"].currentValue != nil && map["synopsis"].currentValue != nil else {return nil}
+        guard (map["ids.imdb"].currentValue != nil || map["imdb_id"].currentValue != nil) && map["title"].currentValue != nil && map["year"].currentValue != nil && (map["rating"].currentValue != nil || map["rating.percentage"].currentValue != nil) && map["runtime"].currentValue != nil && map["certification"].currentValue != nil && map["genres"].currentValue != nil && (map["overview"].currentValue != nil || map["synopsis"].currentValue != nil) else {return nil}
     }
 
     public mutating func mapping(map: Map) {
-        self.id <- map["imdb_id"]
+        if map.context is TraktContext {
+            self.id <- map["ids.imdb"]
+            self.year <- (map["year"], TransformOf<String, Int>(fromJSON: { String($0!) }, toJSON: { Int($0!)}))
+            self.rating <- map["rating"]
+            self.summary <- map["overview"]
+            self.largeCoverImage <- map["images.poster.full"]
+            self.largeBackgroundImage <- map["images.fanart.full"]
+            self.runtime <- (map["runtime"], TransformOf<String, Int>(fromJSON: { String($0!) }, toJSON: { Int($0!)}))
+        } else {
+            self.id <- map["imdb_id"]
+            self.year <- map["year"]
+            self.rating <- map["rating.percentage"]
+            self.summary <- map["synopsis"]
+            self.largeCoverImage <- map["images.poster"]
+            self.largeBackgroundImage <- map["images.fanart"]
+            self.runtime <- map["runtime"]
+        }
         self.title <- map["title"]
-        self.year <- map["year"]
-        self.rating <- map["rating.percentage"]
-        self.runtime <- map["runtime"]
         self.trailer <- map["trailer"]
         self.certification <- map["certification"]
         self.genres <- map["genres"]
-        self.summary <- map["synopsis"]
-        self.largeCoverImage <- map["images.poster"]
-        self.largeBackgroundImage <- map["images.fanart"]
         if let torrents = map["torrents.en"].currentValue as? [String: [String: AnyObject]] {
             for (quality, torrent) in torrents {
                 if var torrent = Mapper<Torrent>().map(torrent) where quality != "0" {

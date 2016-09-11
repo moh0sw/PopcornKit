@@ -7,7 +7,7 @@ platform :tvos, '9.0'
 def pods
   pod 'Alamofire'
   pod 'ObjectMapper'
-  pod 'SWXMLHash'
+  pod 'AlamofireXMLRPC', git: 'https://github.com/PopcornTimeTV/AlamofireXMLRPC.git'
 end
 
 target 'PopcornKit' do

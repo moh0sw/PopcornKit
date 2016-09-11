@@ -1,13 +1,9 @@
 {
     "yts": [
-        "https://movies.api-fetch.website/api/v2/",
-        "http://yts.ph/api/v2/",
-        "http://yify.is/api/v2/"
+        "https://tv-v2.api-fetch.website"
     ],
     "eztv": [
-        "https://api-fetch.website/tv/",
-        "https://eztvapi.ml/",
-        "https://popcornwvnbg7jev.onion.to/"
+        "https://tv-v2.api-fetch.website"
     ],
     "kat": [
       "https://kat.cr/",

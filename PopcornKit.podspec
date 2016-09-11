@@ -17,5 +17,5 @@ Pod::Spec.new do |s|
 
   s.dependency 'Alamofire'
   s.dependency 'ObjectMapper'
-  s.dependency 'SWXMLHash'
+  s.dependency 'AlamofireXMLRPC'
 end

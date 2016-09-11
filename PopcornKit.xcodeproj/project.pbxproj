@@ -16,6 +16,10 @@
 		4D208DAE1D84931A00CB8EDB /* MovieManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D208DAD1D84931A00CB8EDB /* MovieManager.swift */; };
 		4D208DB01D84B58300CB8EDB /* ShowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D208DAF1D84B58300CB8EDB /* ShowManager.swift */; };
 		4D5474A68A60BF2842C4FFAF /* Pods_PopcornKitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D2D50F764D10D6B353B981D /* Pods_PopcornKitTests.framework */; };
+		4DE335491D85795000B6AB6D /* TraktManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE335481D85795000B6AB6D /* TraktManager.swift */; };
+		4DE3354B1D857A1400B6AB6D /* OAuthCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3354A1D857A1400B6AB6D /* OAuthCredential.swift */; };
+		4DE3354D1D85A84C00B6AB6D /* UIAlertController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3354C1D85A84C00B6AB6D /* UIAlertController+Extension.swift */; };
+		4DE3354F1D85A9EA00B6AB6D /* SubtitlesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3354E1D85A9EA00B6AB6D /* SubtitlesManager.swift */; };
 		86AFD118677514EA062238B7 /* Pods_PopcornKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D6E04704B734FF216428D5A /* Pods_PopcornKit.framework */; };
 		923C4C601CA65C9D0026FF6F /* Crew.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923C4C5F1CA65C9D0026FF6F /* Crew.swift */; };
 		925F8DD31CA9E267007100EB /* UpdateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 925F8DD21CA9E267007100EB /* UpdateManager.swift */; };
@@ -55,6 +59,10 @@
 		4D208DAD1D84931A00CB8EDB /* MovieManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MovieManager.swift; path = Network/MovieManager.swift; sourceTree = "<group>"; };
 		4D208DAF1D84B58300CB8EDB /* ShowManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ShowManager.swift; path = Network/ShowManager.swift; sourceTree = "<group>"; };
 		4D6E04704B734FF216428D5A /* Pods_PopcornKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PopcornKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4DE335481D85795000B6AB6D /* TraktManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TraktManager.swift; path = Network/TraktManager.swift; sourceTree = "<group>"; };
+		4DE3354A1D857A1400B6AB6D /* OAuthCredential.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OAuthCredential.swift; path = Resources/OAuthCredential.swift; sourceTree = "<group>"; };
+		4DE3354C1D85A84C00B6AB6D /* UIAlertController+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "UIAlertController+Extension.swift"; path = "Resources/UIAlertController+Extension.swift"; sourceTree = "<group>"; };
+		4DE3354E1D85A9EA00B6AB6D /* SubtitlesManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SubtitlesManager.swift; path = Network/SubtitlesManager.swift; sourceTree = "<group>"; };
 		923C4C5F1CA65C9D0026FF6F /* Crew.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Crew.swift; path = Models/Crew.swift; sourceTree = "<group>"; };
 		925F8DD21CA9E267007100EB /* UpdateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UpdateManager.swift; path = Network/UpdateManager.swift; sourceTree = "<group>"; };
 		92925B3A1C9E05B80086D362 /* Actor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Actor.swift; path = Models/Actor.swift; sourceTree = "<group>"; };
@@ -106,7 +114,9 @@
 		4D208DA81D8467F400CB8EDB /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				4DE3354A1D857A1400B6AB6D /* OAuthCredential.swift */,
 				4D208DA61D8467D600CB8EDB /* String+Extension.swift */,
+				4DE3354C1D85A84C00B6AB6D /* UIAlertController+Extension.swift */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -178,6 +188,8 @@
 				4D208DAB1D848F5800CB8EDB /* AnimeManager.swift */,
 				4D208DAF1D84B58300CB8EDB /* ShowManager.swift */,
 				4D208DAD1D84931A00CB8EDB /* MovieManager.swift */,
+				4DE335481D85795000B6AB6D /* TraktManager.swift */,
+				4DE3354E1D85A9EA00B6AB6D /* SubtitlesManager.swift */,
 			);
 			name = Network;
 			sourceTree = "<group>";
@@ -470,8 +482,11 @@
 				4D208DAC1D848F5800CB8EDB /* AnimeManager.swift in Sources */,
 				4D208DA31D84614100CB8EDB /* Media.swift in Sources */,
 				D9911D581D6B72D400A0A13B /* KATResult.swift in Sources */,
+				4DE3354D1D85A84C00B6AB6D /* UIAlertController+Extension.swift in Sources */,
+				4DE3354F1D85A9EA00B6AB6D /* SubtitlesManager.swift in Sources */,
 				4D208DA11D8460BA00CB8EDB /* Person.swift in Sources */,
 				4D208DA51D8461D200CB8EDB /* Subtitle.swift in Sources */,
+				4DE335491D85795000B6AB6D /* TraktManager.swift in Sources */,
 				4D208DAA1D848A2200CB8EDB /* PopcornKit.swift in Sources */,
 				4D208DAE1D84931A00CB8EDB /* MovieManager.swift in Sources */,
 				92BD96E21C9644D600B8071E /* Episode.swift in Sources */,
@@ -480,6 +495,7 @@
 				92BD96921C960B6700B8071E /* Movie.swift in Sources */,
 				923C4C601CA65C9D0026FF6F /* Crew.swift in Sources */,
 				925F8DD31CA9E267007100EB /* UpdateManager.swift in Sources */,
+				4DE3354B1D857A1400B6AB6D /* OAuthCredential.swift in Sources */,
 				92BD96971C960E6500B8071E /* Torrent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
