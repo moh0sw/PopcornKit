@@ -35,8 +35,8 @@ public struct Movie: Media, Equatable {
     public var largeCoverImage: String?
 
     public var directors: [Crew] {return crew.filter({$0.roleType == .Director})}
-    public var crew: [Crew]!
-    public var actors: [Actor]!
+    public var crew = [Crew]()
+    public var actors = [Actor]()
     public var torrents = [Torrent]()
     public var currentTorrent: Torrent!
     public var subtitles: [Subtitle]?

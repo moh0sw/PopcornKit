@@ -32,12 +32,12 @@ public struct Show: Media, Equatable {
     public var largeCoverImage: String?
     
     public var directors: [Crew] {return crew.filter({$0.roleType == .Director})}
-    public var crew: [Crew]!
-    public var actors: [Actor]!
-    public var episodes: [Episode]!
+    public var crew = [Crew]()
+    public var actors = [Actor]()
+    public var episodes = [Episode]()
     
     public init?(_ map: Map) {
-        guard (map["imdb_id"].currentValue != nil || map["ids.imdb"].currentValue != nil) && map["title"].currentValue != nil && map["year"].currentValue != nil && (map["slug"].currentValue != nil || map["ids.slug"].currentValue != nil) && (map["rating"].currentValue != nil || map["rating.percentage"].currentValue != nil) else {return nil}
+        guard (map["imdb_id"].currentValue != nil || map["ids.imdb"].currentValue != nil || map["_id"].currentValue != nil) && map["title"].currentValue != nil && map["year"].currentValue != nil && (map["slug"].currentValue != nil || map["ids.slug"].currentValue != nil) && (map["rating"].currentValue != nil || map["rating.percentage"].currentValue != nil) else {return nil}
     }
     
     public mutating func mapping(map: Map) {
@@ -49,7 +49,7 @@ public struct Show: Media, Equatable {
             self.largeCoverImage <- map["images.poster.full"]
             self.largeBackgroundImage <- map["images.fanart.full"]
         } else {
-            self.id <- map["imdb_id"]
+            self.id <- map["imdb_id"]; id = id ?? map["_id"].currentValue as? String
             self.year <- map["year"]
             self.rating <- map["rating.percentage"]
             self.largeCoverImage <- map["images.poster"]
@@ -57,7 +57,6 @@ public struct Show: Media, Equatable {
             self.slug <- map["slug"]
         }
         self.summary <- map["synopsis"]
-        self.id <- map["imdb_id"]
         self.title <- map["title"]
         self.year <- map["year"]
         self.status <- map["status"]
@@ -66,7 +65,7 @@ public struct Show: Media, Equatable {
         self.genres <- map["genres"]
         self.episodes <- map["episodes"]
         self.runtime <- map["runtime"]
-        episodes.sortInPlace({ $0.episode < $1.episode })
+        self.episodes.sortInPlace({ $0.episode < $1.episode })
     }
 }
 

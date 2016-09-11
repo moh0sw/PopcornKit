@@ -30,6 +30,17 @@ public func loadAnime(
 }
 
 /**
+ Get more anime information.
+ 
+ - Parameter id:            The identification code of the anime.
+ 
+ - Parameter completion:    Completion handler for the request. Returns show upon success, error upon failure.
+ */
+public func getAnimeInfo(id: String, completion: (show: Show?, error: NSError?) -> Void) {
+    AnimeManager.sharedManager.getInfo(id, completion: completion)
+}
+
+/**
  Load TV Shows from API.
  
  - Parameter page:       The page number to load.
@@ -54,6 +65,17 @@ public func loadShows(
         searchTerm: searchTerm,
         orderBy: order,
         completion: completion)
+}
+
+/**
+ Get more show information.
+ 
+ - Parameter imbdId:        The imbd identification code of the show.
+ 
+ - Parameter completion:    Completion handler for the request. Returns show upon success, error upon failure.
+ */
+public func getShowInfo(imdbId: String, completion: (show: Show?, error: NSError?) -> Void) {
+    ShowManager.sharedManager.getInfo(imdbId, completion: completion)
 }
 
 
@@ -84,3 +106,16 @@ public func loadMovies(
         orderBy: order,
         completion: completion)
 }
+
+/**
+ Get more movie information.
+ 
+ - Parameter imbdId: The imbd identification code for the movie.
+ 
+ - Parameter completion:    Completion handler for the request. Returns movie upon success, error upon failure.
+ */
+public func getInfo(imdbId: String, completion: (movie: Movie?, error: NSError?) -> Void) {
+    MovieManager.sharedManager.getInfo(imdbId, completion: completion)
+}
+
+

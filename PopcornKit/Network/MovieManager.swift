@@ -71,6 +71,7 @@ public class MovieManager: NetworkManager {
             }
         }
     }
+    
     /**
      Load Movies from API.
      
@@ -102,6 +103,7 @@ public class MovieManager: NetworkManager {
             completion(movies: Mapper<Movie>().mapArray(value), error: nil)
         }
     }
+    
     /**
      Get more movie information.
      

@@ -20,6 +20,7 @@
 		4DE3354B1D857A1400B6AB6D /* OAuthCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3354A1D857A1400B6AB6D /* OAuthCredential.swift */; };
 		4DE3354D1D85A84C00B6AB6D /* UIAlertController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3354C1D85A84C00B6AB6D /* UIAlertController+Extension.swift */; };
 		4DE3354F1D85A9EA00B6AB6D /* SubtitlesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE3354E1D85A9EA00B6AB6D /* SubtitlesManager.swift */; };
+		4DE335511D85D42500B6AB6D /* WatchlistManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE335501D85D42500B6AB6D /* WatchlistManager.swift */; };
 		86AFD118677514EA062238B7 /* Pods_PopcornKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D6E04704B734FF216428D5A /* Pods_PopcornKit.framework */; };
 		923C4C601CA65C9D0026FF6F /* Crew.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923C4C5F1CA65C9D0026FF6F /* Crew.swift */; };
 		925F8DD31CA9E267007100EB /* UpdateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 925F8DD21CA9E267007100EB /* UpdateManager.swift */; };
@@ -32,7 +33,6 @@
 		92BD96991C961C5400B8071E /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92BD96981C961C5400B8071E /* NetworkManager.swift */; };
 		92BD96E01C963A2000B8071E /* Show.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92BD96DF1C963A2000B8071E /* Show.swift */; };
 		92BD96E21C9644D600B8071E /* Episode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92BD96E11C9644D600B8071E /* Episode.swift */; };
-		D9911D581D6B72D400A0A13B /* KATResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9911D571D6B72D400A0A13B /* KATResult.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +63,7 @@
 		4DE3354A1D857A1400B6AB6D /* OAuthCredential.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OAuthCredential.swift; path = Resources/OAuthCredential.swift; sourceTree = "<group>"; };
 		4DE3354C1D85A84C00B6AB6D /* UIAlertController+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "UIAlertController+Extension.swift"; path = "Resources/UIAlertController+Extension.swift"; sourceTree = "<group>"; };
 		4DE3354E1D85A9EA00B6AB6D /* SubtitlesManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SubtitlesManager.swift; path = Network/SubtitlesManager.swift; sourceTree = "<group>"; };
+		4DE335501D85D42500B6AB6D /* WatchlistManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WatchlistManager.swift; path = Network/WatchlistManager.swift; sourceTree = "<group>"; };
 		923C4C5F1CA65C9D0026FF6F /* Crew.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Crew.swift; path = Models/Crew.swift; sourceTree = "<group>"; };
 		925F8DD21CA9E267007100EB /* UpdateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UpdateManager.swift; path = Network/UpdateManager.swift; sourceTree = "<group>"; };
 		92925B3A1C9E05B80086D362 /* Actor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Actor.swift; path = Models/Actor.swift; sourceTree = "<group>"; };
@@ -77,7 +78,6 @@
 		92BD96981C961C5400B8071E /* NetworkManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NetworkManager.swift; path = Network/NetworkManager.swift; sourceTree = "<group>"; };
 		92BD96DF1C963A2000B8071E /* Show.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Show.swift; path = Models/Show.swift; sourceTree = "<group>"; };
 		92BD96E11C9644D600B8071E /* Episode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Episode.swift; path = Models/Episode.swift; sourceTree = "<group>"; };
-		D9911D571D6B72D400A0A13B /* KATResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KATResult.swift; sourceTree = "<group>"; };
 		E1C0F0822B41A868C05B265F /* Pods-PopcornKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PopcornKit.release.xcconfig"; path = "Pods/Target Support Files/Pods-PopcornKit/Pods-PopcornKit.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -165,7 +165,6 @@
 		92BD96931C960B6900B8071E /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				D9911D571D6B72D400A0A13B /* KATResult.swift */,
 				92BD96E11C9644D600B8071E /* Episode.swift */,
 				92BD96DF1C963A2000B8071E /* Show.swift */,
 				92BD96911C960B6700B8071E /* Movie.swift */,
@@ -190,6 +189,7 @@
 				4D208DAD1D84931A00CB8EDB /* MovieManager.swift */,
 				4DE335481D85795000B6AB6D /* TraktManager.swift */,
 				4DE3354E1D85A9EA00B6AB6D /* SubtitlesManager.swift */,
+				4DE335501D85D42500B6AB6D /* WatchlistManager.swift */,
 			);
 			name = Network;
 			sourceTree = "<group>";
@@ -481,7 +481,6 @@
 				4D208DB01D84B58300CB8EDB /* ShowManager.swift in Sources */,
 				4D208DAC1D848F5800CB8EDB /* AnimeManager.swift in Sources */,
 				4D208DA31D84614100CB8EDB /* Media.swift in Sources */,
-				D9911D581D6B72D400A0A13B /* KATResult.swift in Sources */,
 				4DE3354D1D85A84C00B6AB6D /* UIAlertController+Extension.swift in Sources */,
 				4DE3354F1D85A9EA00B6AB6D /* SubtitlesManager.swift in Sources */,
 				4D208DA11D8460BA00CB8EDB /* Person.swift in Sources */,
@@ -497,6 +496,7 @@
 				925F8DD31CA9E267007100EB /* UpdateManager.swift in Sources */,
 				4DE3354B1D857A1400B6AB6D /* OAuthCredential.swift in Sources */,
 				92BD96971C960E6500B8071E /* Torrent.swift in Sources */,
+				4DE335511D85D42500B6AB6D /* WatchlistManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -4,14 +4,5 @@
     ],
     "eztv": [
         "https://tv-v2.api-fetch.website"
-    ],
-    "kat": [
-      "https://kat.cr/",
-      "https://kat.al/",
-      "https://kickassto.co/",
-      "https://kickass.ag/",
-      "https://thekat.tv/",
-      "https://kickass.ac/",
-      "https://katproxy.is/"
     ]
 }

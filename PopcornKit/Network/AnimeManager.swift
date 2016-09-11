@@ -119,8 +119,8 @@ public class AnimeManager: NetworkManager {
      */
     public func getInfo(id: String, completion: (show: Show?, error: NSError?) -> Void) {
         self.manager.request(.GET, Popcorn.Base + Popcorn.Anime + "/\(id)").validate().responseJSON { response in
-            guard let value = response.result.value else {completion(show: nil, error: response.result.error); return}
-            completion(show: Mapper<Show>().map(value), error: nil)
+            guard let responseObject = response.result.value as? [String: AnyObject] else {completion(show: nil, error: response.result.error); return}
+            completion(show: Mapper<Show>().map(responseObject), error: nil)
         }
     }
 }

@@ -3,10 +3,10 @@
 import Foundation
 import ObjectMapper
 
-class TraktManager: NetworkManager {
+public class TraktManager: NetworkManager {
     
     /// Creates new instance of TraktManager class
-    static let sharedManager = TraktManager()
+    public static let sharedManager = TraktManager()
     
     /**
      Scrobbles current video.
@@ -18,7 +18,7 @@ class TraktManager: NetworkManager {
      
      - Parameter completion:    Optional completion handler only called if an error is thrown.
      */
-    func scrobble(id: String, progress: Float, type: Trakt.MediaType, status: Trakt.WatchedStatus, completion: ((error: NSError) -> Void)?) {
+    public func scrobble(id: String, progress: Float, type: Trakt.MediaType, status: Trakt.WatchedStatus, completion: ((error: NSError) -> Void)? = nil) {
         guard var credential = OAuthCredential.retrieveCredentialWithIdentifier("trakt") else {return}
         dispatch_async(dispatch_get_global_queue(Int(QOS_CLASS_USER_INITIATED.rawValue), 0)) {
             if credential.expired {
@@ -51,7 +51,7 @@ class TraktManager: NetworkManager {
      
      - Parameter completion:    The completion handler for the request containing an optional largeImageUrl, optional tvdbId and optional imdbId.
      */
-    func getEpisodeMetadata(showId: String, episodeNumber: Int, seasonNumber: Int, completion:(largeImageUrl: String?, tvdbId: Int?, imdbId: String?, error: NSError?) -> Void) {
+    public func getEpisodeMetadata(showId: String, episodeNumber: Int, seasonNumber: Int, completion:(largeImageUrl: String?, tvdbId: Int?, imdbId: String?, error: NSError?) -> Void) {
         self.manager.request(.GET, Trakt.Base + Trakt.Shows +  "/\(showId)" + Trakt.Seasons + "/\(seasonNumber)" + Trakt.Episodes + "/\(episodeNumber)", parameters: Trakt.Parameters.ExtendedImages, headers: Trakt.Headers.Default).validate().responseJSON { response in
             if let responseObject = response.result.value as? [String: AnyObject] {
                 let image = responseObject["images"]?["screenshot"]??["full"] as? String
@@ -71,7 +71,7 @@ class TraktManager: NetworkManager {
      
      - Parameter completion:        The completion handler for the request containing an array of either imdbIds or tvdbIds depending on the type selected and an optional error.
      */
-    func getWatched(forMediaOfType type: Trakt.MediaType, completion:(ids: [String], error: NSError?) -> Void) {
+    public func getWatched(forMediaOfType type: Trakt.MediaType, completion:(ids: [String], error: NSError?) -> Void) {
         guard var credential = OAuthCredential.retrieveCredentialWithIdentifier("trakt") else { return}
         dispatch_async(dispatch_get_global_queue(Int(QOS_CLASS_USER_INITIATED.rawValue), 0)) {
             if credential.expired {
@@ -117,7 +117,7 @@ class TraktManager: NetworkManager {
      
      - Parameter completion:    The completion handler for the request containing a dictionary of either imdbIds or tvdbIds depending on the type selected as keys and the users corrisponding watched progress as values and an optional error. Eg. ["tt1431045": 0.5] means you have watched half of Deadpool.
      */
-    func getPlaybackProgress(type: Trakt.MediaType, completion: (progressDict: [String: Float], error: NSError?) -> Void) {
+    public func getPlaybackProgress(type: Trakt.MediaType, completion: (progressDict: [String: Float], error: NSError?) -> Void) {
         guard var credential = OAuthCredential.retrieveCredentialWithIdentifier("trakt") else {return}
         dispatch_async(dispatch_get_global_queue(Int(QOS_CLASS_USER_INITIATED.rawValue), 0)) {
             if credential.expired {
@@ -150,7 +150,7 @@ class TraktManager: NetworkManager {
      
      - Parameter completion:    An optional completion handler called only if an error is thrown.
      */
-    func removeItemFromHistory(type: Trakt.MediaType, id: String, completion: ((error: NSError) -> Void)?) {
+    public func removeItemFromHistory(type: Trakt.MediaType, id: String, completion: ((error: NSError) -> Void)? = nil) {
         guard var credential = OAuthCredential.retrieveCredentialWithIdentifier("trakt") else {return}
         dispatch_async(dispatch_get_global_queue(Int(QOS_CLASS_USER_INITIATED.rawValue), 0)) {
             if credential.expired {
@@ -166,7 +166,6 @@ class TraktManager: NetworkManager {
             } else if type == .Episodes {
                 parameters = ["episodes": [["ids": ["tvdb": Int(id)!]]]]
             }
-            
             self.manager.request(.POST, Trakt.Base + Trakt.Sync + Trakt.History + Trakt.Remove , parameters: parameters, encoding: .JSON, headers: Trakt.Headers.Authorization(credential.accessToken)).validate().responseJSON(completionHandler: { response in
                 if let error = response.result.error {dispatch_async(dispatch_get_main_queue(), { completion?(error: error)})
                 }
@@ -182,12 +181,14 @@ class TraktManager: NetworkManager {
      
      - Parameter completion:        The completion handler for the request containing an array of actors, array of crews and an optional error.
      */
-    func getPeople(forMediaOfType type: Trakt.MediaType, id: String, completion: (actors: [Actor], crews: [Crew], error: NSError?) -> Void) {
+    public func getPeople(forMediaOfType type: Trakt.MediaType, id: String, completion: (actors: [Actor], crews: [Crew], error: NSError?) -> Void) {
         self.manager.request(.GET, Trakt.Base + "/\(type.rawValue)/\(id)" + Trakt.People, parameters: Trakt.Parameters.ExtendedImages, headers: Trakt.Headers.Default).validate().responseJSON { response in
-            guard let responseObject = response.result.value as? [String: AnyObject] else { completion(actors: [Actor](), crews:  [Crew](), error: response.result.error); return}
-            let actors = Mapper<Actor>().mapArray(responseObject["cast"]) ?? [Actor]()
+            guard let responseObject = response.result.value as? [String: AnyObject],
+                let people = responseObject["crew"] as? [String: [AnyObject]],
+                let cast = responseObject["cast"] as? [[String: AnyObject]] else { completion(actors: [Actor](), crews:  [Crew](), error: response.result.error); return}
+            let actors = Mapper<Actor>().mapArray(cast) ?? [Actor]()
             var crews = [Crew]()
-            for (role, crew) in responseObject["crew"] as! [String: [AnyObject]] {
+            for (role, crew) in people {
                 if let crew = Mapper<Crew>().mapArray(crew) {
                     for var person in crew {person.roleType = Role(rawValue: role); crews.append(person)}
                 }
@@ -199,15 +200,38 @@ class TraktManager: NetworkManager {
     /**
      Retrieves related media.
      
-     - Parameter forMediaOfType:    The type of the item (movie or show **not anime**). Anime is supported but is referenced as a show not as its own type.
-     - Parameter id:                The id of the movie, show or anime.
+     - Parameter media:         The media you would like to get more information about. **Please note:** only the imdbdId is used but an object needs to be passed in for Swift generics to work so creating a blank object with only an imdbId variable initialised will suffice if necessary.
      
-     - Returns: Array of imageUrls, titles and ids.
+     - Parameter completion:    The requests completion handler containing array of related movies and an optional error.
      */
-    func getRelated<T: Media>(id: String, completion: (media: [T], error: NSError?) -> Void) {
-        self.manager.request(.GET, Trakt.Base + (T.self is Movie ? "/movies" : "/shows") + "/\(id)" + Trakt.Related, parameters: Trakt.Parameters.ExtendedAll, headers: Trakt.Headers.Default).validate().responseJSON { response in
-            guard let responseObject = response.result.value as? [String: AnyObject] else { completion(media: [T](), error: response.result.error); return }
+    public func getRelated<T: Media>(media: T, completion: (media: [T], error: NSError?) -> Void) {
+        self.manager.request(.GET, Trakt.Base + (media is Movie ? Trakt.Movies : Trakt.Shows) + "/\(media.id)" + Trakt.Related, parameters: Trakt.Parameters.ExtendedAll, headers: Trakt.Headers.Default).validate().responseJSON { response in
+            guard let responseObject = response.result.value as? [[String: AnyObject]] else { completion(media: [T](), error: response.result.error); return }
             completion(media: Mapper<T>(context: TraktContext()).mapArray(responseObject) ?? [T](), error: nil)
+        }
+    }
+    
+    /**
+     Retrieves movies or shows that the person in cast/crew in.
+     
+     - Parameter forPersonWithId:   The id of the person you would like to get more information about.
+     - Parameter media:             Just the type of the media is required for Swift generics to work.
+     
+     - Parameter completion:        The requests completion handler containing array of movies and an optional error.
+     */
+    public func getMediaCredits<T: Media>(forPersonWithId id: String, media: T.Type, completion: (media: [T], error: NSError?) -> Void) {
+        self.manager.request(.GET, Trakt.Base + Trakt.People + "/\(id)" + (media is Movie.Type ? Trakt.Movies : Trakt.Shows), parameters: Trakt.Parameters.ExtendedAll, headers: Trakt.Headers.Default).validate().responseJSON { response in
+            guard let responseObject = response.result.value as? [String: AnyObject] else { completion(media: [T](), error: response.result.error); return }
+            var movies = [T]()
+            if let people = responseObject["crew"] as? [String: [[String: AnyObject]]] {
+                for (_, item) in people {
+                    for item in item { if let media = Mapper<T>(context: TraktContext()).map(item["movie"]) { movies.append(media) } }
+                }
+            }
+            if let cast = responseObject["cast"] as? [[String: AnyObject]] {
+                for item in cast { if let media = Mapper<T>(context: TraktContext()).map(item["movie"]) { movies.append(media) }}
+            }
+            completion(media: movies, error: nil)
         }
     }
 }

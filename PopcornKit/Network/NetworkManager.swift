@@ -1,12 +1,13 @@
 import Foundation
 import Alamofire
 
-internal struct Trakt {
+public struct Trakt {
     static let APIKey = "a3b34d7ce9a7f8c1bb216eed6c92b11f125f91ee0e711207e1030e7cdc965e19"
     static let APISecret = "22afa0081bea52793740395c6bc126d15e1f72b0bfb89bbd5729310079f1a01c"
     static let Base = "https://api.trakt.tv"
     static let Shows = "/shows"
-    static let People = "people"
+    static let Movies = "/movies"
+    static let People = "/people"
     static let Seasons = "/seasons"
     static let Episodes = "/episodes"
     static let Auth = "/oauth"
@@ -18,12 +19,12 @@ internal struct Trakt {
     static let Related = "/related"
     static let Watched = "/watched"
     static let Scrobble = "/scrobble"
-    struct Parameters {
+    public struct Parameters {
         static let ExtendedImages = ["extended" : "images"]
         static let ExtendedFull = ["extended" : "full"]
         static let ExtendedAll = ["extended" : "full,images"]
     }
-    struct Headers {
+    public struct Headers {
         static let Default = [
             "Content-Type": "application/json",
             "trakt-api-version": "2",
@@ -35,7 +36,7 @@ internal struct Trakt {
             return Authorization
         }
     }
-    enum MediaType: String {
+    public enum MediaType: String {
         case Movies = "movies"
         case Shows = "shows"
         case Episodes = "episodes"
@@ -48,7 +49,7 @@ internal struct Trakt {
      - .Paused:     When the video is paused.
      - .Finished:   When the video is stopped or finishes playing on its own.
      */
-    enum WatchedStatus: String {
+    public enum WatchedStatus: String {
         /// When the video intially starts playing or is unpaused.
         case Watching = "start"
         /// When the video is paused.
@@ -58,7 +59,7 @@ internal struct Trakt {
     }
 }
 
-internal struct Popcorn {
+public struct Popcorn {
     static let Base = "https://tv-v2.api-fetch.website"
     static let Shows = "/shows"
     static let Animes = "/animes"
