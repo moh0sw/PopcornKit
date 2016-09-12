@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.platforms = { :ios => "9.0", :tvos => "9.0" }
   s.requires_arc = true
 
-  s.source_files = 'PopcornKit/**/*.{swift}'
+  s.source_files = 'PopcornKit/**/*.{swift,h,m}'
 
   s.frameworks = 'UIKit', 'Foundation'
   s.module_name = 'PopcornKit'
