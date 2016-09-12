@@ -2,6 +2,7 @@
 
 import Foundation
 import Alamofire
+import UIKit
 
 /**
  A manager class that automatically looks for new releases from github and presents them to the user.
