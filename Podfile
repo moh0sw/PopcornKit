@@ -1,8 +1,7 @@
 use_frameworks!
 
 source 'https://github.com/CocoaPods/Specs'
-
-platform :tvos, '9.0'
+source 'https://github.com/angryDuck2/CocoaSpecs'
 
 def pods
   pod 'Alamofire'
@@ -10,10 +9,13 @@ def pods
   pod 'AlamofireXMLRPC', git: 'https://github.com/PopcornTimeTV/AlamofireXMLRPC.git'
 end
 
-target 'PopcornKit' do
-  pods
+target 'PopcornKit tvOS' do
+    platform :tvos, '9.0'
+    pods
 end
 
-target 'PopcornKitTests' do
-  pods
+target 'PopcornKit iOS' do
+    platform :ios, '9.0'
+    pods
+    pod 'SRT2VTT'
 end

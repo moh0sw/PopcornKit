@@ -2,7 +2,6 @@
 
 import Foundation
 import ObjectMapper
-import Alamofire
 
 public enum Health {
     case Bad
@@ -127,22 +126,4 @@ public func <(lhs: Torrent, rhs: Torrent) -> Bool {
 
 public func == (lhs: Torrent, rhs: Torrent) -> Bool {
     return lhs.hash == rhs.hash
-}
-
-public func downloadTorrentFile(path: String, completion: (url: String?, error: NSError?) -> Void) {
-    var finalPath: NSURL!
-    Alamofire.download(.GET, path, destination: { (temporaryURL, response) -> NSURL in
-        finalPath = NSURL(fileURLWithPath: NSTemporaryDirectory()).URLByAppendingPathComponent(response.suggestedFilename!)
-        if NSFileManager.defaultManager().fileExistsAtPath(finalPath.relativePath!) {
-            try! NSFileManager.defaultManager().removeItemAtPath(finalPath.relativePath!)
-        }
-        return finalPath
-    }).validate().response { (_, _, _, error) in
-        if let error = error {
-            print(error)
-            completion(url: nil, error: error)
-            return
-        }
-        completion(url: finalPath.relativePath!, error: nil)
-    }
 }

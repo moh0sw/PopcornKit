@@ -1,6 +1,6 @@
 
 
-import Foundation
+import UIKit
 
 extension UIAlertController {
     func show() {
@@ -8,7 +8,7 @@ extension UIAlertController {
         window.rootViewController = UIViewController()
         window.windowLevel = UIWindowLevelAlert + 1
         window.makeKeyAndVisible()
-        if let presentedViewController = window.rootViewController?.presentedViewController where presentedViewController is UIAlertController {return}
+        if let rootViewController = window.rootViewController where rootViewController is UIAlertController {return}
         window.rootViewController!.presentViewController(self, animated: true, completion: nil)
     }
 }
