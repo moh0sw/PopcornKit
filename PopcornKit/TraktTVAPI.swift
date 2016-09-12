@@ -86,6 +86,7 @@ public class TraktTVAPI {
                 traktWatchedRequest.request(trakt){ dict, err in
                     if err != nil{
                         completion(nil)
+                        return
                     }
                     let results = (dict?.flatMap({$0.media}))!
                     
@@ -126,6 +127,7 @@ public class TraktTVAPI {
             search.request(trakt){object, error in
                 if error != nil{
                     completion(nil)
+                    return
                 }
                 completion(object!.id)
             }
@@ -134,6 +136,7 @@ public class TraktTVAPI {
             search.request(trakt){object, error in
                 if error != nil{
                     completion(nil)
+                    return
                 }
                 completion(object!.id)
             }
@@ -148,6 +151,7 @@ public class TraktTVAPI {
             if(error != nil){
                 print("error occured durring addition to watchlist \(error?.description)")
                 completion(added:false)
+                return
             }
             
             if let added = result.flatMap({$0.added}){
@@ -190,6 +194,7 @@ public class TraktTVAPI {
             if(error != nil){
                 print("error occured durring addition to watchlist \(error?.description)")
                 completion(removed: false)
+                return
             }
             
             if let deleted = result.flatMap({$0.deleted}){
