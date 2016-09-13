@@ -15,8 +15,8 @@ Pod::Spec.new do |s|
   s.frameworks = 'UIKit', 'Foundation'
   s.module_name = 'PopcornKit'
 
-  s.dependency 'Alamofire'
+  s.dependency 'Alamofire', '~> 3.5'
   s.dependency 'ObjectMapper'
-  s.dependency 'AlamofireXMLRPC'
+  s.dependency 'AlamofireXMLRPC', '~> 3.0'
   s.dependency 'SRT2VTT'
 end

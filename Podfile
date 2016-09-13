@@ -4,7 +4,7 @@ source 'https://github.com/CocoaPods/Specs'
 source 'https://github.com/angryDuck2/CocoaSpecs'
 
 def pods
-  pod 'Alamofire'
+  pod 'Alamofire', '~> 3.5'
   pod 'ObjectMapper'
   pod 'AlamofireXMLRPC', git: 'https://github.com/PopcornTimeTV/AlamofireXMLRPC.git'
 end
