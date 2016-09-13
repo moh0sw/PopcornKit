@@ -1,6 +1,5 @@
 
 
-import Foundation
 import AlamofireXMLRPC
 import Alamofire
 
@@ -19,6 +18,7 @@ public class SubtitlesManager {
         let url = NSURL(string: secureBaseURL)!
         return NSURLProtectionSpace(host: url.host!, port: url.port!.integerValue, protocol: url.scheme, realm: nil, authenticationMethod: NSURLAuthenticationMethodHTTPBasic)
     }
+    
     /**
      Load subtitles from API. Use episode or ImdbId not both. Using ImdbId rewards better results.
      
@@ -57,6 +57,7 @@ public class SubtitlesManager {
             dispatch_async(dispatch_get_main_queue(), {completion(subtitles: subtitles, error: nil)})
         })
     }
+    
     /**
      Login to OpenSubtitles API. Login is required to use the API.
      

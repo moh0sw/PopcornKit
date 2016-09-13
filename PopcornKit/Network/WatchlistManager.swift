@@ -1,7 +1,5 @@
 
 
-import Foundation
-
 /// Class for managing a users watchlist.
 public class WatchlistManager {
     

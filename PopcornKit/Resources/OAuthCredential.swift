@@ -1,6 +1,5 @@
 
 
-import Foundation
 import Alamofire
 
 enum OAuthGrantType: String {

@@ -1,6 +1,5 @@
 
 
-import Foundation
 import ObjectMapper
 
 public class MovieManager: NetworkManager {

@@ -1,7 +1,5 @@
 
 
-import Foundation
-
 extension String {
     func sliceFrom(start: String, to: String) -> String? {
         return (rangeOfString(start)?.endIndex).flatMap { sInd in

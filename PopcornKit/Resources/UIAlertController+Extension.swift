@@ -1,7 +1,5 @@
 
 
-import UIKit
-
 extension UIAlertController {
     func show() {
         let window = UIWindow(frame: UIScreen.mainScreen().bounds)

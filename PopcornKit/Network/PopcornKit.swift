@@ -1,6 +1,5 @@
 
 
-import Foundation
 import Alamofire
 
 #if os(iOS)

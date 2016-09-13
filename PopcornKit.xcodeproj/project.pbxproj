@@ -104,6 +104,7 @@
 		4D5C03201D87265D00BA3E51 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = PopcornKit/Sources/Info.plist; sourceTree = SOURCE_ROOT; };
 		4D6901431D8736B200F26AD9 /* NSData+GZIP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSData+GZIP.h"; path = "Resources/NSData+GZIP.h"; sourceTree = "<group>"; };
 		4D6901461D8736F600F26AD9 /* NSData+GZIP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSData+GZIP.m"; path = "Resources/NSData+GZIP.m"; sourceTree = "<group>"; };
+		4D69014C1D88671700F26AD9 /* PopcornKit.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; name = PopcornKit.modulemap; path = PopcornKit/Sources/PopcornKit.modulemap; sourceTree = SOURCE_ROOT; };
 		4D6E04704B734FF216428D5A /* Pods_PopcornKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PopcornKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4DE335481D85795000B6AB6D /* TraktManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TraktManager.swift; path = Network/TraktManager.swift; sourceTree = "<group>"; };
 		4DE3354A1D857A1400B6AB6D /* OAuthCredential.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OAuthCredential.swift; path = Resources/OAuthCredential.swift; sourceTree = "<group>"; };
@@ -189,6 +190,7 @@
 			children = (
 				4D5C031F1D87265D00BA3E51 /* PopcornKit.h */,
 				4D5C03201D87265D00BA3E51 /* Info.plist */,
+				4D69014C1D88671700F26AD9 /* PopcornKit.modulemap */,
 			);
 			name = Sources;
 			path = "PopcornKit iOS";
@@ -630,6 +632,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = "$(SRCROOT)/PopcornKit/Sources/PopcornKit.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.PopcornTimeTV.PopcornKit-iOS";
 				PRODUCT_NAME = PopcornKit;
 				SDKROOT = iphoneos;
@@ -654,6 +657,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = "$(SRCROOT)/PopcornKit/Sources/PopcornKit.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.PopcornTimeTV.PopcornKit-iOS";
 				PRODUCT_NAME = PopcornKit;
 				SDKROOT = iphoneos;
@@ -703,6 +707,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/PopcornKit/Sources/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = "$(SRCROOT)/PopcornKit/Sources/PopcornKit.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.PopcornTimeTV.PopcornKit-tvOS";
 				PRODUCT_NAME = PopcornKit;
 				SKIP_INSTALL = YES;
@@ -724,6 +729,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/PopcornKit/Sources/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = "$(SRCROOT)/PopcornKit/Sources/PopcornKit.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.PopcornTimeTV.PopcornKit-tvOS";
 				PRODUCT_NAME = PopcornKit;
 				SKIP_INSTALL = YES;
