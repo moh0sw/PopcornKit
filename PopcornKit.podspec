@@ -17,6 +17,6 @@ Pod::Spec.new do |s|
 
   s.dependency 'Alamofire', '~> 3.5'
   s.dependency 'ObjectMapper'
-  s.dependency 'AlamofireXMLRPC', '~> 3.0'
+  s.dependency 'AlamofireXMLRPC'
   s.dependency 'SRT2VTT'
 end
