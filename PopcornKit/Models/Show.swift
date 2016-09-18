@@ -17,17 +17,17 @@ public struct Show: Media, Equatable {
     public var numberOfSeasons: Int!
     
     public var smallBackgroundImage: String? {
-        return largeBackgroundImage?.stringByReplacingOccurrencesOfString("original", withString: "thumb")
+        return largeBackgroundImage?.replacingOccurrences(of: "original", with: "thumb")
     }
     public var mediumBackgroundImage: String? {
-        return largeBackgroundImage?.stringByReplacingOccurrencesOfString("original", withString: "medium")
+        return largeBackgroundImage?.replacingOccurrences(of: "original", with: "medium")
     }
     public var largeBackgroundImage: String?
     public var smallCoverImage: String? {
-        return largeCoverImage?.stringByReplacingOccurrencesOfString("original", withString: "thumb")
+        return largeCoverImage?.replacingOccurrences(of: "original", with: "thumb")
     }
     public var mediumCoverImage: String? {
-        return largeCoverImage?.stringByReplacingOccurrencesOfString("original", withString: "medium")
+        return largeCoverImage?.replacingOccurrences(of: "original", with: "medium")
     }
     public var largeCoverImage: String?
     
@@ -36,7 +36,7 @@ public struct Show: Media, Equatable {
     public var actors = [Actor]()
     public var episodes = [Episode]()
     
-    public init?(_ map: Map) {
+    public init?(map: Map) {
         guard (map["imdb_id"].currentValue != nil || map["ids.imdb"].currentValue != nil || map["_id"].currentValue != nil) && map["title"].currentValue != nil && map["year"].currentValue != nil && (map["slug"].currentValue != nil || map["ids.slug"].currentValue != nil) && (map["rating"].currentValue != nil || map["rating.percentage"].currentValue != nil) else {return nil}
     }
     
@@ -65,7 +65,7 @@ public struct Show: Media, Equatable {
         self.genres <- map["genres"]
         self.episodes <- map["episodes"]
         self.runtime <- map["runtime"]
-        self.episodes.sortInPlace({ $0.episode < $1.episode })
+        self.episodes.sort(by: { $0.episode < $1.episode })
     }
 }
 

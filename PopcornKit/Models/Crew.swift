@@ -13,7 +13,7 @@ public struct Crew: Person, Equatable {
     public var largeImage: String?
     public var imdbId: String!
     
-    public init?(_ map: Map) {
+    public init?(map: Map) {
         guard map["job"].currentValue != nil && map["person.name"].currentValue != nil && map["person.ids.imdb"].currentValue != nil  else {return nil}
     }
     

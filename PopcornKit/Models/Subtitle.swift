@@ -14,7 +14,7 @@ public struct Subtitle: Mappable {
         self.ISO639 = ISO639
     }
     
-    public init?(_ map: Map) {
+    public init?(map: Map) {
         guard map["LanguageName"].currentValue != nil && map["SubDownloadLink"].currentValue != nil && map["ISO639"].currentValue != nil else {return nil}
     }
     

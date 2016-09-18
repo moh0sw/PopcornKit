@@ -19,7 +19,7 @@ let kOAuth2CredentialServiceName = "OAuthCredentialService"
  */
 class OAuthCredential: NSObject, NSCoding {
     
-    class func keychainQueryDictionaryWithIdentifier(identifier: String) -> NSMutableDictionary {
+    class func keychainQueryDictionaryWithIdentifier(_ identifier: String) -> NSMutableDictionary {
         return [
             kSecClass as String       : kSecClassGenericPassword,
             kSecAttrService as String : kOAuth2CredentialServiceName,
@@ -29,19 +29,19 @@ class OAuthCredential: NSObject, NSCoding {
     
     override var description: String {
         get {
-            return "<\(self.dynamicType) accessToken:\"\(self.accessToken)\"\n tokenType:\"\(self.tokenType)\"\n refreshToken:\"\(self.refreshToken)\"\n expiration:\"\(self.expiration)\">"
+            return "<\(type(of: self)) accessToken:\"\(self.accessToken)\"\n tokenType:\"\(self.tokenType)\"\n refreshToken:\"\(self.refreshToken)\"\n expiration:\"\(self.expiration)\">"
         }
     }
     
     /**
      The OAuth access token.
      */
-    private(set) var accessToken: String!
+    private(set) var accessToken: String
     
     /**
      The OAuth token type (e.g. "bearer").
      */
-    private(set) var tokenType: String!
+    private(set) var tokenType: String
     
     /**
      The OAuth refresh token.
@@ -52,15 +52,13 @@ class OAuthCredential: NSObject, NSCoding {
      Whether the OAuth credentials are expired.
      */
     var expired: Bool {
-        get {
-            return self.expiration?.compare(NSDate()) == .OrderedAscending
-        }
+        return self.expiration?.compare(Date()) == .orderedAscending
     }
     
     /**
      The expiration date of the credential.
      */
-    var expiration: NSDate?
+    var expiration: Date?
 
     
     /**
@@ -72,7 +70,7 @@ class OAuthCredential: NSObject, NSCoding {
      - Returns: Fully initialised `OAuthCredential`.
      */
     class func credentialWithOAuthToken(
-        token token: String,
+        token: String,
         tokenType: String
         ) -> Self {
         return self.init(token: token, tokenType: tokenType)
@@ -118,7 +116,7 @@ class OAuthCredential: NSObject, NSCoding {
         if scope != nil {
             params["scope"] = scope!
         }
-        try self.init(URLString: URLString, parameters: params, clientID: clientID, clientSecret: clientSecret, useBasicAuthentication: useBasicAuthentication)
+        try self.init(URLString: URLString, parameters: params as [String : AnyObject], clientID: clientID, clientSecret: clientSecret, useBasicAuthentication: useBasicAuthentication)
     }
     
     /**
@@ -142,7 +140,7 @@ class OAuthCredential: NSObject, NSCoding {
         useBasicAuthentication: Bool = true
         ) throws {
         let params = ["refresh_token": refreshToken, "grant_type": OAuthGrantType.Refresh.rawValue]
-        try self.init(URLString: URLString, parameters: params, clientID: clientID, clientSecret: clientSecret, useBasicAuthentication: useBasicAuthentication)
+        try self.init(URLString: URLString, parameters: params as [String : AnyObject], clientID: clientID, clientSecret: clientSecret, useBasicAuthentication: useBasicAuthentication)
     }
     
     /**
@@ -168,7 +166,7 @@ class OAuthCredential: NSObject, NSCoding {
         useBasicAuthentication: Bool = true
         ) throws {
         let params = ["grant_type": OAuthGrantType.Code.rawValue, "code": code, "redirect_uri": redirectURI]
-        try self.init(URLString: URLString, parameters: params, clientID: clientID, clientSecret: clientSecret, useBasicAuthentication: useBasicAuthentication)
+        try self.init(URLString: URLString, parameters: params as [String : AnyObject], clientID: clientID, clientSecret: clientSecret, useBasicAuthentication: useBasicAuthentication)
     }
     
     /**
@@ -186,34 +184,32 @@ class OAuthCredential: NSObject, NSCoding {
      */
     init?(
         URLString: String,
-        parameters: [String: AnyObject],
+        parameters: [String: Any],
         clientID: String,
         clientSecret: String,
         useBasicAuthentication: Bool = true
         ) throws {
-        if NSThread.isMainThread() { print("Consider moving this method to a background thread to prevent performance loss.") }
+        accessToken = ""; tokenType = "" // Initialize variables with blank values to keep compiler happy.
+        super.init()
+        if Thread.isMainThread { print("Consider moving this method to a background thread to prevent performance loss.") }
         var headers: [String: String]?
         var parameters = parameters
         if useBasicAuthentication {
-            headers = ["Authorization": "Basic \("\(clientID):\(clientSecret)".dataUsingEncoding(NSUTF8StringEncoding)!.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.init(rawValue: 0)))"]
+            headers = ["Authorization": "Basic \("\(clientID):\(clientSecret)".data(using: String.Encoding.utf8)!.base64EncodedString(options: NSData.Base64EncodingOptions.init(rawValue: 0)))"]
         } else {
             parameters["client_id"] = clientID
             parameters["client_secret"] = clientSecret
         }
-        let semaphore = dispatch_semaphore_create(0)
+        let semaphore = DispatchSemaphore(value: 0)
         var error: NSError?
-        super.init()
-        let queue = dispatch_queue_create("com.popcorn-time.response.queue", DISPATCH_QUEUE_CONCURRENT)
-        Alamofire.request(.POST, URLString, parameters: parameters, headers: headers).validate().responseJSON(queue: queue, options: .AllowFragments, completionHandler: { response in
-            guard let responseObject = response.result.value as? [String: AnyObject] else {
-                error = response.result.error!
-                dispatch_async(dispatch_get_main_queue()) { dispatch_semaphore_signal(semaphore) }
+        let queue = DispatchQueue(label: "com.popcorn-time.response.queue", attributes: DispatchQueue.Attributes.concurrent)
+        Alamofire.request(URLString, method: .post, parameters: parameters, headers: headers).validate().responseJSON(queue: queue, options: .allowFragments, completionHandler: { response in
+            guard let responseObject = response.result.value as? [String: Any] else {
+                error = response.result.error as NSError?
+                DispatchQueue.main.async(execute: { semaphore.signal() })
                 return
             }
-            var refreshToken = responseObject["refresh_token"] as? String
-            if refreshToken == nil || refreshToken == NSNull() {
-                refreshToken = parameters["refresh_token"] as? String
-            }
+            let refreshToken = responseObject["refresh_token"] as? String ?? parameters["refresh_token"] as? String
             self.accessToken = responseObject["access_token"] as! String
             self.tokenType = responseObject["token_type"] as! String
             if refreshToken != nil // refreshToken is optional in the OAuth2 spec.
@@ -222,16 +218,15 @@ class OAuthCredential: NSObject, NSCoding {
             }
             
             // Expiration is optional, but recommended in the OAuth2 spec. It not provide, assume distantFuture == never expires.
-            var expireDate: NSDate? = NSDate.distantFuture()
+            var expireDate = Date.distantFuture
             if let expiresIn = responseObject["expires_in"] as? Int {
-                expireDate = NSDate(timeIntervalSinceNow: Double(expiresIn))
+                expireDate = Date(timeIntervalSinceNow: Double(expiresIn))
             }
-            if expireDate != nil {
-                self.expiration = expireDate!
-            }
-            dispatch_async(dispatch_get_main_queue()) { dispatch_semaphore_signal(semaphore) }
+            self.expiration = expireDate
+            
+            DispatchQueue.main.async(execute: { semaphore.signal() })
         })
-        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+        semaphore.wait()
         if error != nil { throw error!}
     }
     
@@ -241,7 +236,7 @@ class OAuthCredential: NSObject, NSCoding {
      - Parameter refreshToken:  The OAuth refresh token.
      - Parameter expiration:    The expiration of the access token.
      */
-    func setRefreshToken(refreshToken: String, expiration: NSDate) {
+    func setRefreshToken(_ refreshToken: String, expiration: Date) {
         self.refreshToken = refreshToken
         self.expiration = expiration
     }
@@ -256,7 +251,7 @@ class OAuthCredential: NSObject, NSCoding {
      
      - Returns: Whether or not the credential was stored in the keychain.
      */
-    class func storeCredential(credential: OAuthCredential, identifier: String) -> Bool {
+    @discardableResult class func storeCredential(_ credential: OAuthCredential, identifier: String) -> Bool {
         return self.storeCredential(credential, identifier: identifier, accessibility: kSecAttrAccessibleWhenUnlocked)
     }
     
@@ -270,15 +265,15 @@ class OAuthCredential: NSObject, NSCoding {
      - Returns: Whether or not the credential was stored in the keychain.
      */
     class func storeCredential(
-        credential: OAuthCredential,
+        _ credential: OAuthCredential,
         identifier: String,
         accessibility: AnyObject
         ) -> Bool {
         let queryDictionary = keychainQueryDictionaryWithIdentifier(identifier)
         
-        var updateDictionary = [String: AnyObject]()
+        var updateDictionary = [String: Any]()
         
-        updateDictionary[kSecValueData as String] = NSKeyedArchiver.archivedDataWithRootObject(credential)
+        updateDictionary[kSecValueData as String] = NSKeyedArchiver.archivedData(withRootObject: credential)
         updateDictionary[kSecAttrAccessible as String] = accessibility
         
         let status: OSStatus
@@ -286,9 +281,9 @@ class OAuthCredential: NSObject, NSCoding {
         let exists = retrieveCredentialWithIdentifier(identifier) != nil
         
         if exists {
-            status = SecItemUpdate(queryDictionary as CFDictionary, updateDictionary);
+            status = SecItemUpdate(queryDictionary as CFDictionary, updateDictionary as CFDictionary);
         } else {
-            queryDictionary.addEntriesFromDictionary(updateDictionary)
+            queryDictionary.addEntries(from: updateDictionary)
             status = SecItemAdd(queryDictionary as CFDictionary, nil)
         }
         
@@ -302,19 +297,19 @@ class OAuthCredential: NSObject, NSCoding {
      
      - Returns: The retrieved OAuth credential.
      */
-    class func retrieveCredentialWithIdentifier(identifier: String) -> OAuthCredential? {
+    class func retrieveCredentialWithIdentifier(_ identifier: String) -> OAuthCredential? {
         let queryDictionary = keychainQueryDictionaryWithIdentifier(identifier)
         queryDictionary[kSecReturnData as String] = kCFBooleanTrue
         queryDictionary[kSecMatchLimit as String] = kSecMatchLimitOne
         
         var result: AnyObject?
-        let status: OSStatus = withUnsafeMutablePointer(&result) {SecItemCopyMatching(queryDictionary as CFDictionaryRef, UnsafeMutablePointer($0)) }
+        let status: OSStatus = withUnsafeMutablePointer(to: &result) {SecItemCopyMatching(queryDictionary as CFDictionary, UnsafeMutablePointer($0)) }
         
         if status != errSecSuccess {
             return nil
         }
         
-        return NSKeyedUnarchiver.unarchiveObjectWithData(result as! NSData) as? OAuthCredential
+        return NSKeyedUnarchiver.unarchiveObject(with: result as! Data) as? OAuthCredential
     }
     
     /**
@@ -324,7 +319,7 @@ class OAuthCredential: NSObject, NSCoding {
      
      - Returns: Whether or not the credential was deleted from the keychain.
      */
-    class func deleteCredentialWithIdentifier(identifier: String) -> Bool {
+    class func deleteCredentialWithIdentifier(_ identifier: String) -> Bool {
         let queryDictionary = keychainQueryDictionaryWithIdentifier(identifier)
         
         let status = SecItemDelete(queryDictionary as CFDictionary)
@@ -334,18 +329,18 @@ class OAuthCredential: NSObject, NSCoding {
     
     // MARK: - NSCoding
     
-    func encodeWithCoder(aCoder: NSCoder) {
-        aCoder.encodeObject(accessToken, forKey: "accessToken")
-        aCoder.encodeObject(tokenType, forKey: "tokenType")
-        aCoder.encodeObject(refreshToken, forKey: "refreshToken")
-        aCoder.encodeObject(expiration, forKey: "expiration")
+    func encode(with aCoder: NSCoder) {
+        aCoder.encode(accessToken, forKey: "accessToken")
+        aCoder.encode(tokenType, forKey: "tokenType")
+        aCoder.encode(refreshToken, forKey: "refreshToken")
+        aCoder.encode(expiration, forKey: "expiration")
     }
     
     required init?(coder aDecoder: NSCoder) {
+        accessToken = aDecoder.decodeObject(forKey: "accessToken") as! String
+        tokenType = aDecoder.decodeObject(forKey: "tokenType") as! String
+        refreshToken = aDecoder.decodeObject(forKey: "refreshToken") as? String
+        expiration = aDecoder.decodeObject(forKey: "expiration") as? Date
         super.init()
-        accessToken = aDecoder.decodeObjectForKey("accessToken") as! String
-        tokenType = aDecoder.decodeObjectForKey("tokenType") as! String
-        refreshToken = aDecoder.decodeObjectForKey("refreshToken") as? String
-        expiration = aDecoder.decodeObjectForKey("expiration") as? NSDate
     }
 }

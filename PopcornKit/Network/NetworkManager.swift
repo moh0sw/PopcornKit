@@ -31,7 +31,7 @@ public struct Trakt {
             "trakt-api-key": Trakt.APIKey
         ]
         
-        static func Authorization(token: String) -> [String: String] {
+        static func Authorization(_ token: String) -> [String: String] {
             var Authorization = Default; Authorization["Authorization"] = "Bearer \(token)"
             return Authorization
         }
@@ -70,22 +70,20 @@ public struct Popcorn {
     static let Show = "/show"
 }
 
-
-
-public class NetworkManager {
-    internal let manager: Manager = {
-        let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        configuration.HTTPCookieAcceptPolicy = .Always
-        configuration.HTTPShouldSetCookies = true
-        configuration.URLCache = nil
-        configuration.requestCachePolicy = .UseProtocolCachePolicy
-        return Alamofire.Manager(configuration: configuration)
+open class NetworkManager: NSObject {
+    internal let manager: SessionManager = {
+        var configuration = URLSessionConfiguration.default
+        configuration.httpCookieAcceptPolicy = .always
+        configuration.httpShouldSetCookies = true
+        configuration.urlCache = nil
+        configuration.requestCachePolicy = .useProtocolCachePolicy
+        return Alamofire.SessionManager(configuration: configuration)
     }()
     
     /// Possible orders used in API call.
     public enum orders: Int {
-        case Ascending = 1
-        case Descending = -1
+        case ascending = 1
+        case descending = -1
         
     }
 }

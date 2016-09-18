@@ -12,10 +12,10 @@ Pod::Spec.new do |s|
 
   s.source_files = 'PopcornKit/**/*.{swift,h,m}'
 
-  s.frameworks = 'UIKit', 'Foundation'
+  s.frameworks = 'UIKit', 'Foundation', 'SafariServices'
   s.module_name = 'PopcornKit'
 
-  s.dependency 'Alamofire', '~> 3.5'
+  s.dependency 'Alamofire'
   s.dependency 'ObjectMapper'
   s.dependency 'AlamofireXMLRPC'
   s.dependency 'SRT2VTT'

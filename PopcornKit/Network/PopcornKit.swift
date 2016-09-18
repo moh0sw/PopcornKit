@@ -18,13 +18,13 @@ import Alamofire
  - Parameter completion: Completion handler for the request. Returns array of animes upon success, error upon failure.
  */
 public func loadAnime(
-    page: Int,
+    _ page: Int,
     filterBy filter: AnimeManager.filters,
-    genre: AnimeManager.genres = .All,
+    genre: AnimeManager.genres = .all,
     searchTerm: String? = nil,
-    orderBy order: AnimeManager.orders = .Descending,
-    completion: (shows: [Show]?, error: NSError?) -> Void) {
-    AnimeManager.sharedManager.load(
+    orderBy order: AnimeManager.orders = .descending,
+    completion: @escaping (_ shows: [Show]?, _ error: NSError?) -> Void) {
+    AnimeManager.shared.load(
         page,
         filterBy: filter,
         genre: genre,
@@ -40,8 +40,8 @@ public func loadAnime(
  
  - Parameter completion:    Completion handler for the request. Returns show upon success, error upon failure.
  */
-public func getAnimeInfo(id: String, completion: (show: Show?, error: NSError?) -> Void) {
-    AnimeManager.sharedManager.getInfo(id, completion: completion)
+public func getAnimeInfo(_ id: String, completion: @escaping (_ show: Show?, _ error: NSError?) -> Void) {
+    AnimeManager.shared.getInfo(id, completion: completion)
 }
 
 /**
@@ -56,13 +56,13 @@ public func getAnimeInfo(id: String, completion: (show: Show?, error: NSError?) 
  - Parameter completion: Completion handler for the request. Returns array of shows upon success, error upon failure.
  */
 public func loadShows(
-    page: Int,
+    _ page: Int,
     filterBy filter: ShowManager.filters,
-    genre: ShowManager.genres = .All,
+    genre: ShowManager.genres = .all,
     searchTerm: String? = nil,
-    orderBy order: ShowManager.orders = .Descending,
-    completion: (shows: [Show]?, error: NSError?) -> Void) {
-    ShowManager.sharedManager.load(
+    orderBy order: ShowManager.orders = .descending,
+    completion: @escaping (_ shows: [Show]?, _ error: NSError?) -> Void) {
+    ShowManager.shared.load(
         page,
         filterBy: filter,
         genre: genre,
@@ -78,8 +78,8 @@ public func loadShows(
  
  - Parameter completion:    Completion handler for the request. Returns show upon success, error upon failure.
  */
-public func getShowInfo(imdbId: String, completion: (show: Show?, error: NSError?) -> Void) {
-    ShowManager.sharedManager.getInfo(imdbId, completion: completion)
+public func getShowInfo(_ imdbId: String, completion: @escaping (_ show: Show?, _ error: NSError?) -> Void) {
+    ShowManager.shared.getInfo(imdbId, completion: completion)
 }
 
 
@@ -96,13 +96,13 @@ public func getShowInfo(imdbId: String, completion: (show: Show?, error: NSError
  - Parameter completion: Completion handler for the request. Returns array of movies upon success, error upon failure.
  */
 public func loadMovies(
-    page: Int,
+    _ page: Int,
     filterBy filter: MovieManager.filters,
-    genre: MovieManager.genres = .All,
+    genre: MovieManager.genres = .all,
     searchTerm: String? = nil,
-    orderBy order: MovieManager.orders = .Descending,
-    completion: (movies: [Movie]?, error: NSError?) -> Void) {
-    MovieManager.sharedManager.load(
+    orderBy order: MovieManager.orders = .descending,
+    completion: @escaping (_ movies: [Movie]?, _ error: NSError?) -> Void) {
+    MovieManager.shared.load(
         page,
         filterBy: filter,
         genre: genre,
@@ -118,8 +118,8 @@ public func loadMovies(
  
  - Parameter completion:    Completion handler for the request. Returns movie upon success, error upon failure.
  */
-public func getMovieInfo(imdbId: String, completion: (movie: Movie?, error: NSError?) -> Void) {
-    MovieManager.sharedManager.getInfo(imdbId, completion: completion)
+public func getMovieInfo(_ imdbId: String, completion: @escaping (_ movie: Movie?, _ error: NSError?) -> Void) {
+    MovieManager.shared.getInfo(imdbId, completion: completion)
 }
 
 /**
@@ -129,17 +129,14 @@ public func getMovieInfo(imdbId: String, completion: (movie: Movie?, error: NSEr
  
  - Parameter completion:    Completion handler for the request. Returns downloaded torrent url upon success, error upon failure.
  */
-public func downloadTorrentFile(path: String, completion: (url: String?, error: NSError?) -> Void) {
-    var finalPath: NSURL!
-    Alamofire.download(.GET, path, destination: { (temporaryURL, response) -> NSURL in
-        finalPath = NSURL(fileURLWithPath: NSTemporaryDirectory()).URLByAppendingPathComponent(response.suggestedFilename!)
-        if NSFileManager.defaultManager().fileExistsAtPath(finalPath.relativePath!) {
-            try! NSFileManager.defaultManager().removeItemAtPath(finalPath.relativePath!)
-        }
-        return finalPath
-    }).validate().response { (_, _, _, error) in
-        guard error == nil else {completion(url: nil, error: error); return }
-        completion(url: finalPath.path!, error: nil)
+public func downloadTorrentFile(_ path: String, completion: @escaping (_ url: String?, _ error: NSError?) -> Void) {
+    var finalPath: URL!
+    Alamofire.download(path) { (temporaryURL, response) -> (destinationURL: URL, options: DownloadRequest.DownloadOptions) in
+        finalPath = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(response.suggestedFilename!)
+        return (finalPath, .removePreviousFile)
+    }.validate().response { response in
+        guard response.error == nil else {completion(nil, response.error as NSError?); return }
+        completion(finalPath.path, nil)
     }
 }
 
@@ -154,35 +151,31 @@ public func downloadTorrentFile(path: String, completion: (url: String?, error: 
  - Parameter completion:    Completion handler for the request. Returns downloaded subtitle url upon success, error upon failure.
  */
 public func downloadSubtitleFile(
-    path: String,
+    _ path: String,
     fileName suggestedName: String? = nil,
-    downloadDirectory directory: NSURL = NSURL(fileURLWithPath: NSTemporaryDirectory()),
+    downloadDirectory directory: URL = URL(fileURLWithPath: NSTemporaryDirectory()),
     convertToVTT: Bool = false,
-    completion: (subtitlePath: NSURL?, error: NSError?) -> Void) {
-    
-    var downloadDirectory: NSURL!
-    var zippedFilePath: NSURL!
+    completion: @escaping (_ subtitlePath: URL?, _ error: NSError?) -> Void) {
+    var downloadDirectory: URL!
+    var zippedFilePath: URL!
     var fileName: String!
-    Alamofire.download(.GET, path, destination: { (temporaryURL, response) -> NSURL in
+    Alamofire.download(path) { (temporaryURL, response) -> (destinationURL: URL, options: DownloadRequest.DownloadOptions) in
         fileName = suggestedName ?? response.suggestedFilename!
-        downloadDirectory = directory.URLByAppendingPathComponent("Subtitles")
-        if !NSFileManager.defaultManager().fileExistsAtPath(downloadDirectory.path!) {
-            try! NSFileManager.defaultManager().createDirectoryAtURL(downloadDirectory, withIntermediateDirectories: true, attributes: nil)
+        downloadDirectory = directory.appendingPathComponent("Subtitles")
+        if !FileManager.default.fileExists(atPath: downloadDirectory.path) {
+            try! FileManager.default.createDirectory(at: downloadDirectory, withIntermediateDirectories: true, attributes: nil)
         }
-        zippedFilePath = downloadDirectory.URLByAppendingPathComponent(fileName)
-        if NSFileManager.defaultManager().fileExistsAtPath(zippedFilePath.path!) { try! NSFileManager.defaultManager().removeItemAtPath(zippedFilePath.path!) }
-        return zippedFilePath
-    }).validate().response { (_, _, _, error) in
-        guard error == nil else {completion(subtitlePath: nil, error: error); return }
-        let filePath = downloadDirectory.URLByAppendingPathExtension(fileName.stringByReplacingOccurrencesOfString(".gz", withString: ""))
-        NSFileManager.defaultManager().createFileAtPath(filePath.path!, contents: NSFileManager.defaultManager().contentsAtPath(zippedFilePath.path!)?.gunzippedData(), attributes: nil)
+        zippedFilePath = downloadDirectory.appendingPathComponent(fileName)
+        return (zippedFilePath, .removePreviousFile)
+    }.validate().response { response in
+        guard response.error == nil else {completion(nil, response.error as NSError?); return }
+        let filePath = downloadDirectory.appendingPathExtension(fileName.replacingOccurrences(of: ".gz", with: ""))
+        FileManager.default.createFile(atPath: filePath.path, contents: (FileManager.default.contents(atPath: zippedFilePath.path)! as NSData).gunzipped(), attributes: nil)
          #if os(iOS)
-            completion(subtitlePath: convertToVTT ? SRT.sharedConverter().convertFileToVTT(filePath) : filePath, error: nil)
+            completion(convertToVTT ? SRT.sharedConverter().convertFile(toVTT: filePath) : filePath, nil)
         #else
-            completion(subtitlePath: filePath, error: nil)
+            completion(filePath, nil)
         #endif
-        
-        
     }
 }
 

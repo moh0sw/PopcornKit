@@ -1,22 +1,22 @@
 
 
-import AlamofireXMLRPC
 import Alamofire
+import AlamofireXMLRPC
 
-public class SubtitlesManager {
+open class SubtitlesManager: NetworkManager {
     
     /// Creates new instance of SubtitlesManager class
-    public static let sharedManager = SubtitlesManager()
+    open static let shared = SubtitlesManager()
     
     // MARK: - Private Variables.
     
-    private let baseURL = "http://api.opensubtitles.org:80/xml-rpc"
-    private let secureBaseURL = "https://api.opensubtitles.org:443/xml-rpc"
-    private let userAgent = "Popcorn Time v1"
-    private var token: String?
-    var protectionSpace: NSURLProtectionSpace {
-        let url = NSURL(string: secureBaseURL)!
-        return NSURLProtectionSpace(host: url.host!, port: url.port!.integerValue, protocol: url.scheme, realm: nil, authenticationMethod: NSURLAuthenticationMethodHTTPBasic)
+    fileprivate let baseURL = "http://api.opensubtitles.org:80/xml-rpc"
+    fileprivate let secureBaseURL = "https://api.opensubtitles.org:443/xml-rpc"
+    fileprivate let userAgent = "Popcorn Time v1"
+    fileprivate var token: String?
+    var protectionSpace: URLProtectionSpace {
+        let url = URL(string: secureBaseURL)!
+        return URLProtectionSpace(host: url.host!, port: (url as NSURL).port!.intValue, protocol: url.scheme, realm: nil, authenticationMethod: NSURLAuthenticationMethodHTTPBasic)
     }
     
     /**
@@ -28,33 +28,32 @@ public class SubtitlesManager {
      
      - Parameter completion:    Completion handler called with array of subtitles and an optional error.
      */
-    public func search(episode: Episode? = nil, imdbId: String? = nil, limit: String = "300", completion:(subtitles: [Subtitle], error: NSError?) -> Void) {
-        var params: XMLRPCStructure = ["sublanguageid": "all"]
+    open func search(_ episode: Episode? = nil, imdbId: String? = nil, limit: String = "300", completion:@escaping (_ subtitles: [Subtitle], _ error: NSError?) -> Void) {
+        var params = ["sublanguageid": "all"]
         if let imdbId = imdbId {
-            params["imdbid"] = imdbId.stringByReplacingOccurrencesOfString("tt", withString: "")
+            params["imdbid"] = imdbId.replacingOccurrences(of: "tt", with: "")
         } else if let episode = episode {
             params["query"] = episode.title
             params["season"] = String(episode.season)
             params["episode"] = String(episode.episode)
         }
-        let array: XMLRPCArray = [params]
-        let limit: XMLRPCStructure = ["limit": limit]
-        let queue = dispatch_queue_create("com.popcorn-time.response.queue", DISPATCH_QUEUE_CONCURRENT)
-        AlamofireXMLRPC.request(secureBaseURL, methodName: "SearchSubtitles", parameters: [token!, array, limit], headers: ["User-Agent": userAgent]).validate().response(queue: queue, responseSerializer: Request.XMLRPCResponseSerializer(), completionHandler: { response in
+        let limit = ["limit": limit]
+        let queue = DispatchQueue(label: "com.popcorn-time.response.queue", attributes: DispatchQueue.Attributes.concurrent)
+        self.manager.requestXMLRPC(secureBaseURL, methodName: "SearchSubtitles", parameters: [token!, [params], limit], headers: ["User-Agent": userAgent]).validate().responseXMLRPC(queue: queue, completionHandler: { response in
             guard let value = response.result.value,
-                let status = value[0]["status"].string?.componentsSeparatedByString(" ").first,
+                let status = value[0]["status"].string?.components(separatedBy: " ").first,
                 let data = value[0]["data"].array
-                where response.result.isSuccess && status == "200" else {dispatch_async(dispatch_get_main_queue(), {completion(subtitles: [Subtitle](), error: response.result.error)}); return}
+                , response.result.isSuccess && status == "200" else { DispatchQueue.main.async(execute: {completion([Subtitle](), response.result.error as NSError?)}); return}
             var subtitles = [Subtitle]()
             for info in data {
                 guard let languageName = info["LanguageName"].string,
                     let subDownloadLink = info["SubDownloadLink"].string,
                     let ISO639 = info["ISO639"].string
-                    where !subtitles.contains({$0.language == languageName}) else { continue }
+                    , !subtitles.contains(where: {$0.language == languageName}) else { continue }
                 subtitles.append(Subtitle(language: languageName, link: subDownloadLink, ISO639: ISO639))
             }
-            subtitles.sortInPlace({ $0.language < $1.language })
-            dispatch_async(dispatch_get_main_queue(), {completion(subtitles: subtitles, error: nil)})
+            subtitles.sort(by: { $0.language < $1.language })
+            DispatchQueue.main.async(execute: { completion(subtitles, nil) })
         })
     }
     
@@ -64,19 +63,19 @@ public class SubtitlesManager {
      - Parameter completion:    Optional completion handler called when request is sucessfull.
      - Parameter error:         Optional error completion handler called when request fails or username/password is incorrect.
      */
-    public func login(completion:(() -> Void)?, error:((error: NSError) -> Void)? = nil) {
+    open func login(_ completion: (() -> Void)?, error: ((_ error: NSError) -> Void)? = nil) {
         var username = ""
         var password = ""
-        if let credential = NSURLCredentialStorage.sharedCredentialStorage().credentialsForProtectionSpace(protectionSpace)?.values.first {
+        if let credential = URLCredentialStorage.shared.credentials(for: protectionSpace)?.values.first {
             username = credential.user!
             password = credential.password!
         }
-        AlamofireXMLRPC.request(secureBaseURL, methodName: "LogIn", parameters: [username, password, "en", userAgent]).validate().responseXMLRPC { response in
+        self.manager.requestXMLRPC(secureBaseURL, methodName: "LogIn", parameters: [username, password, "en", userAgent]).validate().responseXMLRPC { response in
             guard let value = response.result.value,
-                let status = value[0]["status"].string?.componentsSeparatedByString(" ").first
-                where response.result.isSuccess && status == "200" else {
+                let status = value[0]["status"].string?.components(separatedBy: " ").first
+                , response.result.isSuccess && status == "200" else {
                     let statusError = response.result.error ?? NSError(domain: "com.AlamofireXMLRPC.error", code: -403, userInfo: [NSLocalizedDescriptionKey: "Username or password is incorrect."])
-                    error?(error: statusError)
+                    error?(statusError as NSError)
                     return
             }
             self.token = value[0]["token"].string

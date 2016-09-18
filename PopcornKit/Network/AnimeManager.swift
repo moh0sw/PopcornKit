@@ -2,80 +2,80 @@
 
 import ObjectMapper
 
-public class AnimeManager: NetworkManager {
+open class AnimeManager: NetworkManager {
     
     /// Creates new instance of AnimeManager class
-    public static let sharedManager = AnimeManager()
+    open static let shared = AnimeManager()
     
     /// Possible genres used in API call.
     public enum genres: String {
-        case All = "All"
-        case Action = "Action"
-        case Adventure = "Adventure"
-        case Comedy = "Comedy"
-        case Dementia = "Dementia"
-        case Demons = "Demons"
-        case Drama = "Drama"
-        case Ecchi = "Ecchi"
-        case Fantasy = "Fantasy"
-        case Game = "Game"
-        case GenderBender = "Gender Bender"
-        case Gore = "Gore"
-        case Harem = "Harem"
-        case Historical = "Historical"
-        case Horror = "Horror"
-        case Kids = "Kids"
-        case Magic = "Magic"
-        case MahouShoujo = "Mahou Shoujo"
-        case MahouShounen = "Mahou Shounen"
-        case MartialArts = "Martial Arts"
-        case Mecha = "Mecha"
-        case Military = "Military"
-        case Music = "Music"
-        case Mystery = "Mystery"
-        case Parody = "Parody"
-        case Police = "Police"
-        case Psychological = "Psychological"
-        case Racing = "Racing"
-        case Romance = "Romance"
-        case Samurai = "Samurai"
-        case School = "School"
-        case SciFi = "Sci-Fi"
-        case ShounenAi = "Shounen Ai"
-        case ShoujoAi = "Shoujo Ai"
-        case SliceOfLife = "Slice of Life"
-        case Space = "Space"
-        case Sports = "Sports"
-        case Supernatural = "Supernatural"
-        case SuperPower = "Super Power"
-        case Thriller = "Thriller"
-        case Vampire = "Vampire"
-        case Yuri = "Yuri"
+        case all = "All"
+        case action = "Action"
+        case adventure = "Adventure"
+        case comedy = "Comedy"
+        case dementia = "Dementia"
+        case demons = "Demons"
+        case drama = "Drama"
+        case ecchi = "Ecchi"
+        case fantasy = "Fantasy"
+        case game = "Game"
+        case genderBender = "Gender Bender"
+        case gore = "Gore"
+        case harem = "Harem"
+        case historical = "Historical"
+        case horror = "Horror"
+        case kids = "Kids"
+        case magic = "Magic"
+        case mahouShoujo = "Mahou Shoujo"
+        case mahouShounen = "Mahou Shounen"
+        case martialArts = "Martial Arts"
+        case mecha = "Mecha"
+        case military = "Military"
+        case music = "Music"
+        case mystery = "Mystery"
+        case parody = "Parody"
+        case police = "Police"
+        case psychological = "Psychological"
+        case racing = "Racing"
+        case romance = "Romance"
+        case samurai = "Samurai"
+        case school = "School"
+        case sciFi = "Sci-Fi"
+        case shounenAi = "Shounen Ai"
+        case shoujoAi = "Shoujo Ai"
+        case sliceOfLife = "Slice of Life"
+        case space = "Space"
+        case sports = "Sports"
+        case supernatural = "Supernatural"
+        case superPower = "Super Power"
+        case thriller = "Thriller"
+        case vampire = "Vampire"
+        case yuri = "Yuri"
         
-        static let arrayValue = [All, Action, Adventure, Comedy, Dementia, Demons, Drama, Ecchi, Fantasy, Game, GenderBender, Gore, Harem, Historical, Horror, Kids, Magic, MahouShoujo, MahouShounen, MartialArts, Mecha, Military, Music, Mystery, Parody, Police, Psychological, Racing, Romance, Samurai, School, SciFi, ShounenAi, ShoujoAi, SliceOfLife, Space, Sports, Supernatural, SuperPower, Thriller, Vampire, Yuri]
+        static let array = [all, action, adventure, comedy, dementia, demons, drama, ecchi, fantasy, game, genderBender, gore, harem, historical, horror, kids, magic, mahouShoujo, mahouShounen, martialArts, mecha, military, music, mystery, parody, police, psychological, racing, romance, samurai, school, sciFi, shounenAi, shoujoAi, sliceOfLife, space, sports, supernatural, superPower, thriller, vampire, yuri]
     }
     
     /// Possible filters used in API call.
     public enum filters: String {
-        case Popularity = "popularity"
-        case Year = "year"
-        case Date = "updated"
-        case Rating = "rating"
-        case Alphabet = "name"
+        case popularity = "popularity"
+        case year = "year"
+        case date = "updated"
+        case rating = "rating"
+        case alphabet = "name"
         
-        static let arrayValue = [Popularity, Rating, Date, Year, Alphabet]
+        static let array = [popularity, rating, date, year, alphabet]
         
-        func stringValue() -> String {
+        var string: String {
             switch self {
-            case .Popularity:
+            case .popularity:
                 return "Popular"
-            case .Year:
+            case .year:
                 return "Year"
-            case .Date:
+            case .date:
                 return "Last Updated"
-            case .Rating:
+            case .rating:
                 return "Top Rated"
-            case .Alphabet:
+            case .alphabet:
                 return "A-Z"
             }
         }
@@ -92,20 +92,20 @@ public class AnimeManager: NetworkManager {
      
      - Parameter completion: Completion handler for the request. Returns array of animes upon success, error upon failure.
      */
-    public func load(
-        page: Int,
+    open func load(
+        _ page: Int,
         filterBy filter: filters,
-        genre: genres = .All,
-        searchTerm: String? = nil,
-        orderBy order: orders = .Descending,
-        completion: (shows: [Show]?, error: NSError?) -> Void) {
-        var params: [String: AnyObject] = ["sort": filter.rawValue, "type": genre.rawValue, "order": order.rawValue]
-        if let searchTerm = searchTerm  where !searchTerm.isEmpty {
+        genre: genres,
+        searchTerm: String?,
+        orderBy order: orders,
+        completion: @escaping (_ shows: [Show]?, _ error: NSError?) -> Void) {
+        var params: [String: Any] = ["sort": filter.rawValue, "type": genre.rawValue, "order": order.rawValue]
+        if let searchTerm = searchTerm, !searchTerm.isEmpty {
             params["keywords"] = searchTerm
         }
-        self.manager.request(.GET, Popcorn.Base + Popcorn.Animes + "/\(page)", parameters: params).validate().responseJSON { response in
-            guard let value = response.result.value else {completion(shows: nil, error: response.result.error); return}
-            completion(shows: Mapper<Show>().mapArray(value), error: nil)
+        self.manager.request(Popcorn.Base + Popcorn.Animes + "/\(page)", parameters: params).validate().responseJSON { response in
+            guard let value = response.result.value else {completion(nil, response.result.error as NSError?); return}
+            completion(Mapper<Show>().mapArray(JSONObject: value), nil)
         }
     }
     
@@ -116,10 +116,10 @@ public class AnimeManager: NetworkManager {
      
      - Parameter completion:    Completion handler for the request. Returns show upon success, error upon failure.
      */
-    public func getInfo(id: String, completion: (show: Show?, error: NSError?) -> Void) {
-        self.manager.request(.GET, Popcorn.Base + Popcorn.Anime + "/\(id)").validate().responseJSON { response in
-            guard let responseObject = response.result.value as? [String: AnyObject] else {completion(show: nil, error: response.result.error); return}
-            completion(show: Mapper<Show>().map(responseObject), error: nil)
+    open func getInfo(_ id: String, completion: @escaping (_ show: Show?, _ error: NSError?) -> Void) {
+        self.manager.request(Popcorn.Base + Popcorn.Anime + "/\(id)").validate().responseJSON { response in
+            guard let value = response.result.value else {completion(nil, response.result.error as NSError?); return}
+            completion(Mapper<Show>().map(JSONObject: value), nil)
         }
     }
 }

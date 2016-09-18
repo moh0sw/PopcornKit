@@ -20,17 +20,17 @@ public struct Movie: Media, Equatable {
     public var certification: String!
     
     public var smallBackgroundImage: String? {
-        return largeBackgroundImage?.stringByReplacingOccurrencesOfString("original", withString: "thumb")
+        return largeBackgroundImage?.replacingOccurrences(of: "original", with: "thumb")
     }
     public var mediumBackgroundImage: String? {
-        return largeBackgroundImage?.stringByReplacingOccurrencesOfString("original", withString: "medium")
+        return largeBackgroundImage?.replacingOccurrences(of: "original", with: "medium")
     }
     public var largeBackgroundImage: String?
     public var smallCoverImage: String? {
-        return largeCoverImage?.stringByReplacingOccurrencesOfString("original", withString: "thumb")
+        return largeCoverImage?.replacingOccurrences(of: "original", with: "thumb")
     }
     public var mediumCoverImage: String? {
-        return largeCoverImage?.stringByReplacingOccurrencesOfString("original", withString: "medium")
+        return largeCoverImage?.replacingOccurrences(of: "original", with: "medium")
     }
     public var largeCoverImage: String?
 
@@ -42,7 +42,7 @@ public struct Movie: Media, Equatable {
     public var subtitles: [Subtitle]?
     public var currentSubtitle: Subtitle?
 
-    public init?(_ map: Map) {
+    public init?(map: Map) {
         guard (map["ids.imdb"].currentValue != nil || map["imdb_id"].currentValue != nil) && map["title"].currentValue != nil && map["year"].currentValue != nil && (map["rating"].currentValue != nil || map["rating.percentage"].currentValue != nil) && map["runtime"].currentValue != nil && map["certification"].currentValue != nil && map["genres"].currentValue != nil && (map["overview"].currentValue != nil || map["synopsis"].currentValue != nil) else {return nil}
     }
 
@@ -68,15 +68,15 @@ public struct Movie: Media, Equatable {
         self.trailer <- map["trailer"]
         self.certification <- map["certification"]
         self.genres <- map["genres"]
-        if let torrents = map["torrents.en"].currentValue as? [String: [String: AnyObject]] {
+        if let torrents = map["torrents.en"].currentValue as? [String: [String: Any]] {
             for (quality, torrent) in torrents {
-                if var torrent = Mapper<Torrent>().map(torrent) where quality != "0" {
+                if var torrent = Mapper<Torrent>().map(JSONObject: torrent) , quality != "0" {
                     torrent.quality = quality
                     self.torrents.append(torrent)
                 }
             }
         }
-        torrents.sortInPlace(<)
+        torrents.sort(by: <)
     }
 
 }

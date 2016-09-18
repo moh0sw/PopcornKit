@@ -17,50 +17,50 @@ public final class UpdateManager: NSObject {
      */
     public enum CheckType: Int {
         /// Version check performed every time the app is launched.
-        case Immediately = 0
+        case immediately = 0
         /// Version check performed once a day.
-        case Daily = 1
+        case daily = 1
         /// Version check performed once a week.
-        case Weekly = 7
+        case weekly = 7
     }
     
     /// Current version (CFBundleShortVersionString.CFBundleVersion) of running application.
-    private let currentApplicationVersion = "\(NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleShortVersionString")!).\(NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleVersion")!)"
+    private let currentApplicationVersion = "\(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString")!).\(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion")!)"
     
     /// Designated Initialiser.
-    public static let sharedManager = UpdateManager()
+    public static let shared = UpdateManager()
     
     /// The version that the user does not want installed. If the user has never clicked "Skip this version" this variable will be `nil`, otherwise it will be the last version that the user opted not to install.
     private var skipReleaseVersion: VersionString? {
         get {
-            guard let data = NSUserDefaults.standardUserDefaults().dataForKey("skipReleaseVersion") else { return nil }
+            guard let data = UserDefaults.standard.data(forKey: "skipReleaseVersion") else { return nil }
             return VersionString.unarchive(data)
         } set {
             if let newValue = newValue {
-                NSUserDefaults.standardUserDefaults().setObject(newValue.archived(), forKey: "skipReleaseVersion")
+                UserDefaults.standard.set(newValue.archived(), forKey: "skipReleaseVersion")
             } else {
-                NSUserDefaults.standardUserDefaults().removeObjectForKey("skipReleaseVersion")
+                UserDefaults.standard.removeObject(forKey: "skipReleaseVersion")
             }
         }
     }
     
     /// The date of the last time `checkForUpdates:completion:` was called. If version check was never called, `checkForUpdates:completion:` is called.
-    private var lastVersionCheckPerformedOnDate: NSDate {
+    fileprivate var lastVersionCheckPerformedOnDate: Date {
         get {
-            return NSUserDefaults.standardUserDefaults().objectForKey("lastVersionCheckPerformedOnDate") as? NSDate ?? {
+            return UserDefaults.standard.object(forKey: "lastVersionCheckPerformedOnDate") as? Date ?? {
                 checkForUpdates()
                 return self.lastVersionCheckPerformedOnDate
                 }()
         } set {
-            NSUserDefaults.standardUserDefaults().setObject(newValue, forKey: "lastVersionCheckPerformedOnDate")
+            UserDefaults.standard.set(newValue, forKey: "lastVersionCheckPerformedOnDate")
         }
     }
     
     /// Returns the number of days it has been since `checkForUpdates:completion:` has been called.
     private var daysSinceLastVersionCheckDate: Int {
-        let calendar = NSCalendar.currentCalendar()
-        let components = calendar.components(.Day, fromDate: lastVersionCheckPerformedOnDate, toDate: NSDate(), options: [])
-        return components.day
+        let calendar = Calendar.current
+        let components = (calendar as NSCalendar).components(.day, from: lastVersionCheckPerformedOnDate, to: Date(), options: [])
+        return components.day!
     }
     
     /**
@@ -68,8 +68,8 @@ public final class UpdateManager: NSObject {
      
      - Parameter sucess: Optional callback indicating the status of the operation.
      */
-    public func checkVersion(checkType: CheckType, completion: ((success: Bool) -> Void)? = nil) {
-        if checkType == .Immediately {
+    public func checkVersion(_ checkType: CheckType, completion: ((_ success: Bool) -> Void)? = nil) {
+        if checkType == .immediately {
             checkForUpdates(completion)
         } else {
             if checkType.rawValue <= daysSinceLastVersionCheckDate {
@@ -78,33 +78,33 @@ public final class UpdateManager: NSObject {
         }
     }
     
-    private func checkForUpdates(completion: ((success: Bool) -> Void)? = nil) {
-        lastVersionCheckPerformedOnDate = NSDate()
-        let repo = UIDevice.currentDevice().userInterfaceIdiom == .TV ? "PopcornTimeTV" : "PopcornTimeiOS"
-        Alamofire.request(.GET, "https://api.github.com/repos/PopcornTimeTV/\(repo)/releases").validate().responseJSON { (response) in
-            guard let responseObject = response.result.value as? [String: AnyObject] else { completion?(success: false); return }
-            let sortedReleases = responseObject.map({VersionString($1["tag_name"] as! String, $1["published_at"] as! String)!}).sort({$0.0 > $0.1})
+    private func checkForUpdates(_ completion: ((_ success: Bool) -> Void)? = nil) {
+        lastVersionCheckPerformedOnDate = Date()
+        let repo = UIDevice.current.userInterfaceIdiom == .tv ? "PopcornTimeTV" : "PopcornTimeiOS"
+        Alamofire.request("https://api.github.com/repos/PopcornTimeTV/\(repo)/releases").validate().responseJSON { (response) in
+            guard let responseObject = response.result.value as? [String: AnyObject] else { completion?(false); return }
+            let sortedReleases = responseObject.map({VersionString($1["tag_name"] as! String, $1["published_at"] as! String)!}).sorted(by: {$0.0 > $0.1})
             if let latestRelease = sortedReleases.first,
                 let currentRelease = sortedReleases.filter({$0.buildNumber == self.currentApplicationVersion}).first
-                where latestRelease > currentRelease && self.skipReleaseVersion?.buildNumber != latestRelease.buildNumber {
-                let alert = UIAlertController(title: "Update Available", message: "\(latestRelease.releaseType.rawValue.capitalizedString) version \(latestRelease.buildNumber) of Popcorn Time is now available.", preferredStyle: .Alert)
+                , latestRelease > currentRelease && self.skipReleaseVersion?.buildNumber != latestRelease.buildNumber {
+                let alert = UIAlertController(title: "Update Available", message: "\(latestRelease.releaseType.rawValue.capitalized) version \(latestRelease.buildNumber) of Popcorn Time is now available.", preferredStyle: .alert)
                 
-                let cydiaInstalled = UIApplication.sharedApplication().canOpenURL(NSURL(string: "cydia://")!)
+                let cydiaInstalled = UIApplication.shared.canOpenURL(URL(string: "cydia://")!)
                 if cydiaInstalled {
-                    alert.addAction(UIAlertAction(title: "Next time", style: .Default, handler: nil))
+                    alert.addAction(UIAlertAction(title: "Next time", style: .default, handler: nil))
                 }
-                alert.addAction(UIAlertAction(title: "Skip this version", style: .Default, handler: { (action) in
+                alert.addAction(UIAlertAction(title: "Skip this version", style: .default, handler: { (action) in
                     self.skipReleaseVersion = latestRelease
                 }))
-                alert.addAction(UIAlertAction(title: cydiaInstalled ? "Update" : "OK", style: .Default, handler: { _ in
+                alert.addAction(UIAlertAction(title: cydiaInstalled ? "Update" : "OK", style: .default, handler: { _ in
                     if cydiaInstalled {
-                        UIApplication.sharedApplication().openURL(NSURL(string: "cydia://package/\(NSBundle.mainBundle().bundleIdentifier!)")!)
+                        UIApplication.shared.openURL(URL(string: "cydia://package/\(Bundle.main.bundleIdentifier!)")!)
                     }
                 }))
-                completion?(success: true)
+                completion?(true)
                 alert.show()
             } else {
-                completion?(success: false)
+                completion?(false)
             }
         }
     }
@@ -117,19 +117,19 @@ internal class VersionString: NSObject, NSCoding {
         case Stable = "stable"
     }
     
-    let date: NSDate
+    let date: Date
     let buildNumber: String
     let releaseType: ReleaseType
     
     init?(_ string: String, _ dateString: String) {
         self.buildNumber = string
         self.date = {
-            let formatter = NSDateFormatter()
+            let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-            return formatter.dateFromString(dateString)!
+            return formatter.date(from: dateString)!
             }()
         
-        let components = string.componentsSeparatedByString(".")
+        let components = string.components(separatedBy: ".")
         if let first = components.first, let _ = components[safe: 1], let _ = components[safe: 2] {
             if first == "0" // Beta release. Format will be 0.<major>.<minor>-<patch>.
             {
@@ -143,46 +143,59 @@ internal class VersionString: NSObject, NSCoding {
         return nil
     }
     
-    func encodeWithCoder(aCoder: NSCoder) {
-        aCoder.encodeObject(date, forKey: "date")
-        aCoder.encodeObject(buildNumber, forKey: "buildNumber")
-        aCoder.encodeObject(releaseType.rawValue, forKey: "releaseType")
+    func encode(with aCoder: NSCoder) {
+        aCoder.encode(date, forKey: "date")
+        aCoder.encode(buildNumber, forKey: "buildNumber")
+        aCoder.encode(releaseType.rawValue, forKey: "releaseType")
     }
     
     required init?(coder aDecoder: NSCoder) {
-        guard let date = aDecoder.decodeObjectForKey("date") as? NSDate,
-            let buildNumber = aDecoder.decodeObjectForKey("buildNumber") as? String,
-            let releaseTypeRawValue = aDecoder.decodeObjectForKey("releaseType") as? String,
+        guard let date = aDecoder.decodeObject(forKey: "date") as? Date,
+            let buildNumber = aDecoder.decodeObject(forKey: "buildNumber") as? String,
+            let releaseTypeRawValue = aDecoder.decodeObject(forKey: "releaseType") as? String,
             let releaseType = ReleaseType(rawValue: releaseTypeRawValue) else { return nil }
         self.date = date
         self.buildNumber = buildNumber
         self.releaseType = releaseType
     }
     
-    func archived() -> NSData {
-        return NSKeyedArchiver.archivedDataWithRootObject(self)
+    func archived() -> Data {
+        return NSKeyedArchiver.archivedData(withRootObject: self)
     }
     
-    class func unarchive(data: NSData) -> VersionString? {
-        return NSKeyedUnarchiver.unarchiveObjectWithData(data) as? VersionString
+    class func unarchive(_ data: Data) -> VersionString? {
+        return NSKeyedUnarchiver.unarchiveObject(with: data) as? VersionString
     }
 }
 
 internal func >(lhs: VersionString, rhs: VersionString) -> Bool {
-    return lhs.date.compare(rhs.date) == .OrderedDescending
+    return lhs.date.compare(rhs.date) == .orderedDescending
 }
 
 internal func <(lhs: VersionString, rhs: VersionString) -> Bool {
-    return lhs.date.compare(rhs.date) == .OrderedAscending
+    return lhs.date.compare(rhs.date) == .orderedAscending
 }
 
 internal func ==(lhs: VersionString, rhs: VersionString) -> Bool {
-    return lhs.date.compare(rhs.date) == .OrderedSame
+    return lhs.date.compare(rhs.date) == .orderedSame
 }
 
-extension CollectionType {
+// MARK: - Extensions
+
+extension Collection {
     /// Returns the element at the specified index if it is within bounds, otherwise nil.
-    subscript (safe index: Index) -> Generator.Element? {
-        return indices.contains(index) ? self[index] : nil
+    subscript (safe index: Index) -> Iterator.Element? {
+        return index >= startIndex && index < endIndex ? self[index] : nil
+    }
+}
+
+extension UIAlertController {
+    func show() {
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        window.rootViewController = UIViewController()
+        window.windowLevel = UIWindowLevelAlert + 1
+        window.makeKeyAndVisible()
+        if let rootViewController = window.rootViewController , rootViewController is UIAlertController {return}
+        window.rootViewController!.present(self, animated: true, completion: nil)
     }
 }

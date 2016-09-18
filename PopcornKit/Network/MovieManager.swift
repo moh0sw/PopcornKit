@@ -2,70 +2,70 @@
 
 import ObjectMapper
 
-public class MovieManager: NetworkManager {
+open class MovieManager: NetworkManager {
     
     /// Creates new instance of MovieManager class
-    public static let sharedManager = MovieManager()
+    open static let shared = MovieManager()
     
     /// Possible genres used in API call.
     public enum genres: String {
-        case All = "All"
-        case Action = "Action"
-        case Adventure = "Adventure"
-        case Animation = "Animation"
-        case Comedy = "Comedy"
-        case Crime = "Crime"
-        case Disaster = "Disaster"
-        case Documentary = "Documentary"
-        case Drama = "Drama"
-        case Family = "Family"
-        case FanFilm = "Fan Film"
-        case Fantasy = "Fantasy"
-        case FilmNoir = "Film Noir"
-        case History = "History"
-        case Holiday = "Holiday"
-        case Horror = "Horror"
-        case Indie = "Indie"
-        case Music = "Music"
-        case Mystery = "Mystery"
-        case Road = "Road"
-        case Romance = "Romance"
-        case SciFi = "Science Fiction"
-        case Short = "Short"
-        case Sport = "Sports"
-        case SportingEvent = "Sporting Event"
-        case Suspense = "Suspense"
-        case Thriller = "Thriller"
-        case War = "War"
-        case Western = "Western"
+        case all = "All"
+        case action = "Action"
+        case adventure = "Adventure"
+        case animation = "Animation"
+        case comedy = "Comedy"
+        case crime = "Crime"
+        case disaster = "Disaster"
+        case documentary = "Documentary"
+        case drama = "Drama"
+        case family = "Family"
+        case fanFilm = "Fan Film"
+        case fantasy = "Fantasy"
+        case filmNoir = "Film Noir"
+        case history = "History"
+        case holiday = "Holiday"
+        case horror = "Horror"
+        case indie = "Indie"
+        case music = "Music"
+        case mystery = "Mystery"
+        case road = "Road"
+        case romance = "Romance"
+        case sciFi = "Science Fiction"
+        case short = "Short"
+        case sport = "Sports"
+        case sportingEvent = "Sporting Event"
+        case suspense = "Suspense"
+        case thriller = "Thriller"
+        case war = "War"
+        case western = "Western"
         
-        static let arrayValue = [All, Action, Adventure, Animation, Comedy, Crime, Disaster, Documentary, Drama, Family, FanFilm, Fantasy, FilmNoir, History, Holiday, Horror, Indie, Music, Mystery, Road, Romance, SciFi, Short, Sport, SportingEvent, Suspense, Thriller, War, Western]
+        static let array = [all, action, adventure, animation, comedy, crime, disaster, documentary, drama, family, fanFilm, fantasy, filmNoir, history, holiday, horror, indie, music, mystery, road, romance, sciFi, short, sport, sportingEvent, suspense, thriller, war, western]
     }
     
     /// Possible filters used in API call.
     public enum filters: String {
-        case Trending = "trending"
-        case Popularity = "seeds"
-        case Rating = "rating"
-        case Date = "last added"
-        case Year = "year"
-        case Alphabet = "title"
+        case trending = "trending"
+        case popularity = "seeds"
+        case rating = "rating"
+        case date = "last added"
+        case year = "year"
+        case alphabet = "title"
         
-        static let arrayValue = [Trending, Popularity, Rating, Date, Year, Alphabet]
+        static let array = [trending, popularity, rating, date, year, alphabet]
         
-        func stringValue() -> String {
+        var string: String {
             switch self {
-            case .Popularity:
+            case .popularity:
                 return "Popular"
-            case .Year:
+            case .year:
                 return "Year"
-            case .Date:
+            case .date:
                 return "Release Date"
-            case .Rating:
+            case .rating:
                 return "Top Rated"
-            case .Alphabet:
+            case .alphabet:
                 return "A-Z"
-            case .Trending:
+            case .trending:
                 return "Trending"
             }
         }
@@ -83,23 +83,23 @@ public class MovieManager: NetworkManager {
      
      - Parameter completion: Completion handler for the request. Returns array of movies upon success, error upon failure.
      */
-    public func load(
-        page: Int,
+    open func load(
+        _ page: Int,
         filterBy filter: filters,
-        genre: genres = .All,
-        searchTerm: String? = nil,
-        orderBy order: orders = .Descending,
-        completion: (movies: [Movie]?, error: NSError?) -> Void) {
-        var params: [String: AnyObject] = ["sort": filter.rawValue, "order": order.rawValue, "genre": genre.rawValue.stringByReplacingOccurrencesOfString(" ", withString: "-").lowercaseString]
-        if let searchTerm = searchTerm where !searchTerm.isEmpty {
+        genre: genres,
+        searchTerm: String?,
+        orderBy order: orders,
+        completion: @escaping (_ movies: [Movie]?, _ error: NSError?) -> Void) {
+        var params: [String: Any] = ["sort": filter.rawValue, "order": order.rawValue, "genre": genre.rawValue.replacingOccurrences(of: " ", with: "-").lowercased()]
+        if let searchTerm = searchTerm , !searchTerm.isEmpty {
             params["keywords"] = searchTerm
         }
-        self.manager.request(.GET, Popcorn.Base + Popcorn.Movies + "/\(page)", parameters: params).validate().responseJSON { response in
+        self.manager.request(Popcorn.Base + Popcorn.Movies + "/\(page)", parameters: params).validate().responseJSON { response in
             guard let value = response.result.value else {
-                completion(movies: nil, error: response.result.error)
+                completion(nil, response.result.error as NSError?)
                 return
             }
-            completion(movies: Mapper<Movie>().mapArray(value), error: nil)
+            completion(Mapper<Movie>().mapArray(JSONObject: value), nil)
         }
     }
     
@@ -110,10 +110,10 @@ public class MovieManager: NetworkManager {
      
      - Parameter completion:    Completion handler for the request. Returns movie upon success, error upon failure.
      */
-    public func getInfo(imdbId: String, completion: (movie: Movie?, error: NSError?) -> Void) {
-        self.manager.request(.GET, Popcorn.Base + Popcorn.Movie + "/\(imdbId)").validate().responseJSON { response in
-            guard let value = response.result.value else {completion(movie: nil, error: response.result.error); return}
-            completion(movie: Mapper<Movie>().map(value), error: nil)
+    open func getInfo(_ imdbId: String, completion: @escaping (_ movie: Movie?, _ error: NSError?) -> Void) {
+        self.manager.request(Popcorn.Base + Popcorn.Movie + "/\(imdbId)").validate().responseJSON { response in
+            guard let value = response.result.value else {completion(nil, response.result.error as NSError?); return}
+            completion(Mapper<Movie>().map(JSONObject: value), nil)
         }
     }
     
