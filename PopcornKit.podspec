@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "PopcornKit"
-  s.version = "1.1.0.9"
+  s.version = "1.1.0.10"
   s.summary = "Backend for Popcorn Time iOS and tvOS."
   s.homepage = "https://github.com/PopcornTimeTV/PopcornKit"
   s.license = 'MIT'
