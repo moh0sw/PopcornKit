@@ -17,5 +17,5 @@ end
 target 'PopcornKit iOS' do
     platform :ios, '9.0'
     pods
-    pod 'SRT2VTT'
+    pod 'SRT2VTT', '~> 1.0.1'
 end
