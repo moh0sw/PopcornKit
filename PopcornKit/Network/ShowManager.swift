@@ -8,7 +8,7 @@ open class ShowManager: NetworkManager {
     open static let shared = ShowManager()
     
     /// Possible genres used in API call.
-    public enum genres: String {
+    public enum Genres: String {
         case all = "All"
         case action = "Action"
         case adventure = "Adventure"
@@ -43,7 +43,7 @@ open class ShowManager: NetworkManager {
     }
     
     /// Possible filters used in API call.
-    public enum filters: String {
+    public enum Filters: String {
         case popularity = "popularity"
         case year = "year"
         case date = "updated"
@@ -84,16 +84,16 @@ open class ShowManager: NetworkManager {
      */
     open func load(
         _ page: Int,
-        filterBy filter: filters,
-        genre: genres,
+        filterBy filter: Filters,
+        genre: Genres,
         searchTerm: String?,
-        orderBy order: orders,
+        orderBy order: Orders,
         completion: @escaping (_ shows: [Show]?, _ error: NSError?) -> Void) {
         var params: [String: Any] = ["sort": filter.rawValue, "genre": genre.rawValue.replacingOccurrences(of: " ", with: "-").lowercased(), "order": order.rawValue]
         if let searchTerm = searchTerm , !searchTerm.isEmpty {
             params["keywords"] = searchTerm
         }
-        self.manager.request(Popcorn.Base + Popcorn.Shows + "/\(page)", method: .get, parameters: params).validate().responseJSON { response in
+        self.manager.request(Popcorn.base + Popcorn.shows + "/\(page)", method: .get, parameters: params).validate().responseJSON { response in
             guard let value = response.result.value else {completion(nil, response.result.error as NSError?); return}
             completion(Mapper<Show>().mapArray(JSONObject: value), nil)
         }
@@ -107,7 +107,7 @@ open class ShowManager: NetworkManager {
      - Parameter completion:    Completion handler for the request. Returns show upon success, error upon failure.
      */
     open func getInfo(_ imdbId: String, completion: @escaping (_ show: Show?, _ error: NSError?) -> Void) {
-        self.manager.request(Popcorn.Base + Popcorn.Show + "/\(imdbId)", method: .get).validate().responseJSON { response in
+        self.manager.request(Popcorn.base + Popcorn.show + "/\(imdbId)", method: .get).validate().responseJSON { response in
             guard let value = response.result.value else {completion(nil, response.result.error as NSError?); return}
             completion(Mapper<Show>().map(JSONObject: value), nil)
         }

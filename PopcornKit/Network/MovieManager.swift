@@ -8,7 +8,7 @@ open class MovieManager: NetworkManager {
     open static let shared = MovieManager()
     
     /// Possible genres used in API call.
-    public enum genres: String {
+    public enum Genres: String {
         case all = "All"
         case action = "Action"
         case adventure = "Adventure"
@@ -43,7 +43,7 @@ open class MovieManager: NetworkManager {
     }
     
     /// Possible filters used in API call.
-    public enum filters: String {
+    public enum Filters: String {
         case trending = "trending"
         case popularity = "seeds"
         case rating = "rating"
@@ -85,16 +85,16 @@ open class MovieManager: NetworkManager {
      */
     open func load(
         _ page: Int,
-        filterBy filter: filters,
-        genre: genres,
+        filterBy filter: Filters,
+        genre: Genres,
         searchTerm: String?,
-        orderBy order: orders,
+        orderBy order: Orders,
         completion: @escaping (_ movies: [Movie]?, _ error: NSError?) -> Void) {
         var params: [String: Any] = ["sort": filter.rawValue, "order": order.rawValue, "genre": genre.rawValue.replacingOccurrences(of: " ", with: "-").lowercased()]
         if let searchTerm = searchTerm , !searchTerm.isEmpty {
             params["keywords"] = searchTerm
         }
-        self.manager.request(Popcorn.Base + Popcorn.Movies + "/\(page)", parameters: params).validate().responseJSON { response in
+        self.manager.request(Popcorn.base + Popcorn.movies + "/\(page)", parameters: params).validate().responseJSON { response in
             guard let value = response.result.value else {
                 completion(nil, response.result.error as NSError?)
                 return
@@ -111,7 +111,7 @@ open class MovieManager: NetworkManager {
      - Parameter completion:    Completion handler for the request. Returns movie upon success, error upon failure.
      */
     open func getInfo(_ imdbId: String, completion: @escaping (_ movie: Movie?, _ error: NSError?) -> Void) {
-        self.manager.request(Popcorn.Base + Popcorn.Movie + "/\(imdbId)").validate().responseJSON { response in
+        self.manager.request(Popcorn.base + Popcorn.movie + "/\(imdbId)").validate().responseJSON { response in
             guard let value = response.result.value else {completion(nil, response.result.error as NSError?); return}
             completion(Mapper<Movie>().map(JSONObject: value), nil)
         }

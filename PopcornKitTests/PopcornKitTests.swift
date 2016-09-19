@@ -106,7 +106,7 @@ class PopcornKitTests: XCTestCase {
     
     func testWatched() {
         let expectation = self.expectation(description: "Get watchlist for a user.")
-        TraktManager.shared.getWatched(forMediaOfType: .Movies) { (ids, error) in
+        TraktManager.shared.getWatched(forMediaOfType: .movies) { (ids, error) in
             XCTAssertNotEqual(ids.count, 0, error?.localizedDescription ?? "Unknown error")
             expectation.fulfill()
         }
@@ -115,7 +115,7 @@ class PopcornKitTests: XCTestCase {
     
     func testPeople() {
         let expectation = self.expectation(description: "Get a movies cast and crew.")
-        TraktManager.shared.getPeople(forMediaOfType: .Movies, id: "tt1431045") { (actors, crews, error) in
+        TraktManager.shared.getPeople(forMediaOfType: .movies, id: "tt1431045") { (actors, crews, error) in
             XCTAssertNil(error, error?.localizedDescription ?? "Unknown error")
             expectation.fulfill()
         }

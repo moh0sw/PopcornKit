@@ -18,11 +18,11 @@ import Alamofire
  - Parameter completion: Completion handler for the request. Returns array of animes upon success, error upon failure.
  */
 public func loadAnime(
-    _ page: Int,
-    filterBy filter: AnimeManager.filters,
-    genre: AnimeManager.genres = .all,
+    _ page: Int = 1,
+    filterBy filter: AnimeManager.Filters = .date,
+    genre: AnimeManager.Genres = .all,
     searchTerm: String? = nil,
-    orderBy order: AnimeManager.orders = .descending,
+    orderBy order: AnimeManager.Orders = .descending,
     completion: @escaping (_ shows: [Show]?, _ error: NSError?) -> Void) {
     AnimeManager.shared.load(
         page,
@@ -56,11 +56,11 @@ public func getAnimeInfo(_ id: String, completion: @escaping (_ show: Show?, _ e
  - Parameter completion: Completion handler for the request. Returns array of shows upon success, error upon failure.
  */
 public func loadShows(
-    _ page: Int,
-    filterBy filter: ShowManager.filters,
-    genre: ShowManager.genres = .all,
+    _ page: Int = 1,
+    filterBy filter: ShowManager.Filters = .date,
+    genre: ShowManager.Genres = .all,
     searchTerm: String? = nil,
-    orderBy order: ShowManager.orders = .descending,
+    orderBy order: ShowManager.Orders = .descending,
     completion: @escaping (_ shows: [Show]?, _ error: NSError?) -> Void) {
     ShowManager.shared.load(
         page,
@@ -96,11 +96,11 @@ public func getShowInfo(_ imdbId: String, completion: @escaping (_ show: Show?, 
  - Parameter completion: Completion handler for the request. Returns array of movies upon success, error upon failure.
  */
 public func loadMovies(
-    _ page: Int,
-    filterBy filter: MovieManager.filters,
-    genre: MovieManager.genres = .all,
+    _ page: Int = 1,
+    filterBy filter: MovieManager.Filters = .date,
+    genre: MovieManager.Genres = .all,
     searchTerm: String? = nil,
-    orderBy order: MovieManager.orders = .descending,
+    orderBy order: MovieManager.Orders = .descending,
     completion: @escaping (_ movies: [Movie]?, _ error: NSError?) -> Void) {
     MovieManager.shared.load(
         page,

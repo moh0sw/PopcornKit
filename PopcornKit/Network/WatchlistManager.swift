@@ -7,13 +7,13 @@ open class WatchlistManager {
     fileprivate var currentType: Trakt.MediaType
     
     /// Creates new instance of WatchlistManager class with type of Movies.
-    open static let movie = WatchlistManager(type: .Movies)
+    open static let movie = WatchlistManager(type: .movies)
     
     /// Creates new instance of WatchlistManager class with type of Episodes.
-    open static let episode = WatchlistManager(type: .Episodes)
+    open static let episode = WatchlistManager(type: .episodes)
     
     /// Creates new instance of WatchlistManager class with type of Shows.
-    static let show = WatchlistManager(type: .Shows)
+    static let show = WatchlistManager(type: .shows)
     
     fileprivate init(type: Trakt.MediaType) {
         currentType = type
@@ -33,7 +33,7 @@ open class WatchlistManager {
      - Parameter id:    The imdbId or tvdbId of the media.
      */
     func add(_ id: String) {
-        TraktManager.shared.scrobble(id, progress: 1, type: currentType, status: .Finished)
+        TraktManager.shared.scrobble(id, progress: 1, type: currentType, status: .finished)
         var array = UserDefaults.standard.object(forKey: "Watchlist") as? [String]
         array = array ?? [String]()
         array!.append(id)

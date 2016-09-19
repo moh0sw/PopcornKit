@@ -8,7 +8,7 @@ open class AnimeManager: NetworkManager {
     open static let shared = AnimeManager()
     
     /// Possible genres used in API call.
-    public enum genres: String {
+    public enum Genres: String {
         case all = "All"
         case action = "Action"
         case adventure = "Adventure"
@@ -56,7 +56,7 @@ open class AnimeManager: NetworkManager {
     }
     
     /// Possible filters used in API call.
-    public enum filters: String {
+    public enum Filters: String {
         case popularity = "popularity"
         case year = "year"
         case date = "updated"
@@ -94,16 +94,16 @@ open class AnimeManager: NetworkManager {
      */
     open func load(
         _ page: Int,
-        filterBy filter: filters,
-        genre: genres,
+        filterBy filter: Filters,
+        genre: Genres,
         searchTerm: String?,
-        orderBy order: orders,
+        orderBy order: Orders,
         completion: @escaping (_ shows: [Show]?, _ error: NSError?) -> Void) {
         var params: [String: Any] = ["sort": filter.rawValue, "type": genre.rawValue, "order": order.rawValue]
         if let searchTerm = searchTerm, !searchTerm.isEmpty {
             params["keywords"] = searchTerm
         }
-        self.manager.request(Popcorn.Base + Popcorn.Animes + "/\(page)", parameters: params).validate().responseJSON { response in
+        self.manager.request(Popcorn.base + Popcorn.animes + "/\(page)", parameters: params).validate().responseJSON { response in
             guard let value = response.result.value else {completion(nil, response.result.error as NSError?); return}
             completion(Mapper<Show>().mapArray(JSONObject: value), nil)
         }
@@ -117,7 +117,7 @@ open class AnimeManager: NetworkManager {
      - Parameter completion:    Completion handler for the request. Returns show upon success, error upon failure.
      */
     open func getInfo(_ id: String, completion: @escaping (_ show: Show?, _ error: NSError?) -> Void) {
-        self.manager.request(Popcorn.Base + Popcorn.Anime + "/\(id)").validate().responseJSON { response in
+        self.manager.request(Popcorn.base + Popcorn.anime + "/\(id)").validate().responseJSON { response in
             guard let value = response.result.value else {completion(nil, response.result.error as NSError?); return}
             completion(Mapper<Show>().map(JSONObject: value), nil)
         }

@@ -2,33 +2,35 @@ import Foundation
 import Alamofire
 
 public struct Trakt {
-    static let APIKey = "a3b34d7ce9a7f8c1bb216eed6c92b11f125f91ee0e711207e1030e7cdc965e19"
-    static let APISecret = "22afa0081bea52793740395c6bc126d15e1f72b0bfb89bbd5729310079f1a01c"
-    static let Base = "https://api.trakt.tv"
-    static let Shows = "/shows"
-    static let Movies = "/movies"
-    static let People = "/people"
-    static let Seasons = "/seasons"
-    static let Episodes = "/episodes"
-    static let Auth = "/oauth"
-    static let Token = "/token"
-    static let Sync = "/sync"
-    static let Playback = "/playback"
-    static let History = "/history"
-    static let Remove = "/remove"
-    static let Related = "/related"
-    static let Watched = "/watched"
-    static let Scrobble = "/scrobble"
+    static let apiKey = "a3b34d7ce9a7f8c1bb216eed6c92b11f125f91ee0e711207e1030e7cdc965e19"
+    static let apiSecret = "22afa0081bea52793740395c6bc126d15e1f72b0bfb89bbd5729310079f1a01c"
+    static let base = "https://api.trakt.tv"
+    static let shows = "/shows"
+    static let movies = "/movies"
+    static let people = "/people"
+    static let seasons = "/seasons"
+    static let episodes = "/episodes"
+    static let auth = "/oauth"
+    static let token = "/token"
+    static let sync = "/sync"
+    static let playback = "/playback"
+    static let history = "/history"
+    static let device = "/device"
+    static let code = "/code"
+    static let remove = "/remove"
+    static let related = "/related"
+    static let watched = "/watched"
+    static let scrobble = "/scrobble"
     public struct Parameters {
-        static let ExtendedImages = ["extended" : "images"]
-        static let ExtendedFull = ["extended" : "full"]
-        static let ExtendedAll = ["extended" : "full,images"]
+        static let extendedImages = ["extended" : "images"]
+        static let extendedFull = ["extended" : "full"]
+        static let extendedAll = ["extended" : "full,images"]
     }
     public struct Headers {
         static let Default = [
             "Content-Type": "application/json",
             "trakt-api-version": "2",
-            "trakt-api-key": Trakt.APIKey
+            "trakt-api-key": Trakt.apiKey
         ]
         
         static func Authorization(_ token: String) -> [String: String] {
@@ -37,10 +39,10 @@ public struct Trakt {
         }
     }
     public enum MediaType: String {
-        case Movies = "movies"
-        case Shows = "shows"
-        case Episodes = "episodes"
-        case Animes = "animes"
+        case movies = "movies"
+        case shows = "shows"
+        case episodes = "episodes"
+        case animes = "animes"
     }
     /**
      Watched status of media.
@@ -51,23 +53,23 @@ public struct Trakt {
      */
     public enum WatchedStatus: String {
         /// When the video intially starts playing or is unpaused.
-        case Watching = "start"
+        case watching = "start"
         /// When the video is paused.
-        case Paused = "pause"
+        case paused = "pause"
         /// When the video is stopped or finishes playing on its own.
-        case Finished = "stop"
+        case finished = "stop"
     }
 }
 
 public struct Popcorn {
-    static let Base = "https://tv-v2.api-fetch.website"
-    static let Shows = "/shows"
-    static let Animes = "/animes"
-    static let Movies = "/movies"
+    static let base = "https://tv-v2.api-fetch.website"
+    static let shows = "/shows"
+    static let animes = "/animes"
+    static let movies = "/movies"
 
-    static let Movie = "/movie"
-    static let Anime = "/anime"
-    static let Show = "/show"
+    static let movie = "/movie"
+    static let anime = "/anime"
+    static let show = "/show"
 }
 
 open class NetworkManager: NSObject {
@@ -81,7 +83,7 @@ open class NetworkManager: NSObject {
     }()
     
     /// Possible orders used in API call.
-    public enum orders: Int {
+    public enum Orders: Int {
         case ascending = 1
         case descending = -1
         

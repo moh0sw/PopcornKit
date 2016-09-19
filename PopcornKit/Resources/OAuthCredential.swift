@@ -9,9 +9,6 @@ enum OAuthGrantType: String {
     case Refresh = "refresh_token"
 }
 
-
-let kOAuth2CredentialServiceName = "OAuthCredentialService"
-
 /**
  `OAuthCredential` models the credentials returned from an OAuth server, storing the token type, access & refresh tokens, and whether the token is expired.
  
@@ -19,10 +16,10 @@ let kOAuth2CredentialServiceName = "OAuthCredentialService"
  */
 class OAuthCredential: NSObject, NSCoding {
     
-    class func keychainQueryDictionaryWithIdentifier(_ identifier: String) -> NSMutableDictionary {
+    class func keychainQueryDictionary(withIdentifier identifier: String) -> [String: Any] {
         return [
             kSecClass as String       : kSecClassGenericPassword,
-            kSecAttrService as String : kOAuth2CredentialServiceName,
+            kSecAttrService as String : "OAuthCredentialService",
             kSecAttrAccount as String : identifier
         ]
     }
@@ -33,48 +30,23 @@ class OAuthCredential: NSObject, NSCoding {
         }
     }
     
-    /**
-     The OAuth access token.
-     */
+    
+    /// The OAuth access token.
     private(set) var accessToken: String
     
-    /**
-     The OAuth token type (e.g. "bearer").
-     */
+    /// The OAuth token type (e.g. "bearer").
     private(set) var tokenType: String
     
-    /**
-     The OAuth refresh token.
-     */
+    /// The OAuth refresh token.
     var refreshToken: String?
     
-    /**
-     Whether the OAuth credentials are expired.
-     */
+    /// Boolean value indicating the expired status of the credential.
     var expired: Bool {
         return self.expiration?.compare(Date()) == .orderedAscending
     }
     
-    /**
-     The expiration date of the credential.
-     */
+    /// The expiration date of the credential.
     var expiration: Date?
-
-    
-    /**
-     Creates an OAuth credential from a token string, with a specified type.
-     
-     - Parameter token: The OAuth token string.
-     - Parameter type:  The OAuth token type.
-     
-     - Returns: Fully initialised `OAuthCredential`.
-     */
-    class func credentialWithOAuthToken(
-        token: String,
-        tokenType: String
-        ) -> Self {
-        return self.init(token: token, tokenType: tokenType)
-    }
     
     /**
      Initializes an OAuth credential from a token string, with a specified type.
@@ -93,7 +65,7 @@ class OAuthCredential: NSObject, NSCoding {
      
      - Important: It is recommended that this function would be run on a background thread to stop UI from locking up..
      
-     - Parameter URLString:                 The URL string used to create the request URL.
+     - Parameter url:                       The URL string used to create the request URL.
      - Parameter username:                  The username used for authentication.
      - Parameter password:                  The password used for authentication.
      - Parameter scope:                     The authorization scope.
@@ -103,8 +75,8 @@ class OAuthCredential: NSObject, NSCoding {
      
      - Throws: Error if request fails
      */
-    convenience init?(
-        URLString: String,
+    convenience init(
+        _ url: String,
         username: String,
         password: String,
         scope: String? = nil,
@@ -116,7 +88,7 @@ class OAuthCredential: NSObject, NSCoding {
         if scope != nil {
             params["scope"] = scope!
         }
-        try self.init(URLString: URLString, parameters: params as [String : AnyObject], clientID: clientID, clientSecret: clientSecret, useBasicAuthentication: useBasicAuthentication)
+        try self.init(url, parameters: params as [String : AnyObject], clientID: clientID, clientSecret: clientSecret, useBasicAuthentication: useBasicAuthentication)
     }
     
     /**
@@ -124,7 +96,7 @@ class OAuthCredential: NSObject, NSCoding {
      
      - Important: It is recommended that this function would be run on a background thread to stop UI from locking up..
      
-     - Parameter URLString:                 The URL string used to create the request URL.
+     - Parameter url:                       The URL string used to create the request URL.
      - Parameter refreshToken:              The refresh token returned from the authorization code exchange.
      - Parameter clientID:                  Your client ID for the service.
      - Parameter clientSecret:              Your client secret for the service.
@@ -132,15 +104,15 @@ class OAuthCredential: NSObject, NSCoding {
      
      - Throws: Error if request fails.
      */
-    convenience init?(
-        URLString: String,
+    convenience init(
+        _ url: String,
         refreshToken: String,
         clientID: String,
         clientSecret: String,
         useBasicAuthentication: Bool = true
         ) throws {
         let params = ["refresh_token": refreshToken, "grant_type": OAuthGrantType.Refresh.rawValue]
-        try self.init(URLString: URLString, parameters: params as [String : AnyObject], clientID: clientID, clientSecret: clientSecret, useBasicAuthentication: useBasicAuthentication)
+        try self.init(url, parameters: params as [String : AnyObject], clientID: clientID, clientSecret: clientSecret, useBasicAuthentication: useBasicAuthentication)
     }
     
     /**
@@ -148,7 +120,7 @@ class OAuthCredential: NSObject, NSCoding {
      
      - Important: It is recommended that this function would be run on a background thread to stop UI from locking up..
      
-     - Parameter URLString:                 The URL string used to create the request URL.
+     - Parameter url:                       The URL string used to create the request URL.
      - Parameter code:                      The authorization code.
      - Parameter redirectURI:               The URI to redirect to after successful authentication.
      - Parameter clientID:                  Your client ID for the service.
@@ -157,8 +129,8 @@ class OAuthCredential: NSObject, NSCoding {
      
      - Throws: Error if request fails
      */
-    convenience init?(
-        URLString: String,
+    convenience init(
+        _ url: String,
         code: String,
         redirectURI: String,
         clientID: String,
@@ -166,7 +138,7 @@ class OAuthCredential: NSObject, NSCoding {
         useBasicAuthentication: Bool = true
         ) throws {
         let params = ["grant_type": OAuthGrantType.Code.rawValue, "code": code, "redirect_uri": redirectURI]
-        try self.init(URLString: URLString, parameters: params as [String : AnyObject], clientID: clientID, clientSecret: clientSecret, useBasicAuthentication: useBasicAuthentication)
+        try self.init(url, parameters: params as [String : AnyObject], clientID: clientID, clientSecret: clientSecret, useBasicAuthentication: useBasicAuthentication)
     }
     
     /**
@@ -174,7 +146,7 @@ class OAuthCredential: NSObject, NSCoding {
      
      - Important: It is recommended that this function would be run on a background thread to stop UI from locking up.
      
-     - Parameter URLString:                 The URL string used to create the request URL.
+     - Parameter url:                       The URL string used to create the request URL.
      - Parameter parameters:                The parameters to be encoded and set in the request HTTP body.
      - Parameter clientID:                  Your client ID for the service.
      - Parameter clientSecret:              Your client secret for the service.
@@ -182,8 +154,8 @@ class OAuthCredential: NSObject, NSCoding {
      
      - Throws: Error if request fails
      */
-    init?(
-        URLString: String,
+    init(
+        _ url: String,
         parameters: [String: Any],
         clientID: String,
         clientSecret: String,
@@ -202,8 +174,8 @@ class OAuthCredential: NSObject, NSCoding {
         }
         let semaphore = DispatchSemaphore(value: 0)
         var error: NSError?
-        let queue = DispatchQueue(label: "com.popcorn-time.response.queue", attributes: DispatchQueue.Attributes.concurrent)
-        Alamofire.request(URLString, method: .post, parameters: parameters, headers: headers).validate().responseJSON(queue: queue, options: .allowFragments, completionHandler: { response in
+        let queue = DispatchQueue(label: "com.popcorntimetv.popcornkit.response.queue", attributes: DispatchQueue.Attributes.concurrent)
+        Alamofire.request(url, method: .post, parameters: parameters, headers: headers).validate().responseJSON(queue: queue, options: .allowFragments, completionHandler: { response in
             guard let responseObject = response.result.value as? [String: Any] else {
                 error = response.result.error as NSError?
                 DispatchQueue.main.async(execute: { semaphore.signal() })
@@ -241,49 +213,35 @@ class OAuthCredential: NSObject, NSCoding {
         self.expiration = expiration
     }
     
-    
     /**
      Stores the specified OAuth credential for a given web service identifier in the Keychain.
      with the default Keychain Accessibilty of kSecAttrAccessibleWhenUnlocked.
      
-     - Parameter credential: The OAuth credential to be stored.
-     - Parameter identifier: The service identifier associated with the specified credential.
-     
-     - Returns: Whether or not the credential was stored in the keychain.
-     */
-    @discardableResult class func storeCredential(_ credential: OAuthCredential, identifier: String) -> Bool {
-        return self.storeCredential(credential, identifier: identifier, accessibility: kSecAttrAccessibleWhenUnlocked)
-    }
-    
-    /**
-     Stores the specified OAuth token for a given web service identifier in the Keychain.
-     
      - Parameter credential:            The OAuth credential to be stored.
      - Parameter identifier:            The service identifier associated with the specified token.
-     - Parameter securityAccessibility: The Keychain security accessibility to store the credential with.
+     - Parameter securityAccessibility: The Keychain security accessibility to store the credential with default Keychain Accessibilty of kSecAttrAccessibleWhenUnlocked.
      
-     - Returns: Whether or not the credential was stored in the keychain.
+     - Returns: A boolean value indicating the success of the operation.
      */
-    class func storeCredential(
-        _ credential: OAuthCredential,
-        identifier: String,
-        accessibility: AnyObject
+    @discardableResult func store(
+        withIdentifier identifier: String,
+        accessibility: AnyObject = kSecAttrAccessibleWhenUnlocked
         ) -> Bool {
-        let queryDictionary = keychainQueryDictionaryWithIdentifier(identifier)
+        var queryDictionary = OAuthCredential.keychainQueryDictionary(withIdentifier: identifier)
         
         var updateDictionary = [String: Any]()
         
-        updateDictionary[kSecValueData as String] = NSKeyedArchiver.archivedData(withRootObject: credential)
+        updateDictionary[kSecValueData as String] = NSKeyedArchiver.archivedData(withRootObject: self)
         updateDictionary[kSecAttrAccessible as String] = accessibility
         
         let status: OSStatus
         
-        let exists = retrieveCredentialWithIdentifier(identifier) != nil
+        let exists = OAuthCredential(identifier: identifier) != nil
         
         if exists {
             status = SecItemUpdate(queryDictionary as CFDictionary, updateDictionary as CFDictionary);
         } else {
-            queryDictionary.addEntries(from: updateDictionary)
+            queryDictionary += updateDictionary
             status = SecItemAdd(queryDictionary as CFDictionary, nil)
         }
         
@@ -295,10 +253,10 @@ class OAuthCredential: NSObject, NSCoding {
      
      - Parameter identifier: The service identifier associated with the specified credential.
      
-     - Returns: The retrieved OAuth credential.
+     - Returns: The OAuthCredential if it existed, `nil` otherwise.
      */
-    class func retrieveCredentialWithIdentifier(_ identifier: String) -> OAuthCredential? {
-        let queryDictionary = keychainQueryDictionaryWithIdentifier(identifier)
+    init?(identifier: String) {
+        var queryDictionary = OAuthCredential.keychainQueryDictionary(withIdentifier: identifier)
         queryDictionary[kSecReturnData as String] = kCFBooleanTrue
         queryDictionary[kSecMatchLimit as String] = kSecMatchLimitOne
         
@@ -309,7 +267,12 @@ class OAuthCredential: NSObject, NSCoding {
             return nil
         }
         
-        return NSKeyedUnarchiver.unarchiveObject(with: result as! Data) as? OAuthCredential
+        guard let credential = NSKeyedUnarchiver.unarchiveObject(with: result as! Data) as? OAuthCredential else {return nil}
+        self.accessToken = credential.accessToken
+        self.expiration = credential.expiration
+        self.refreshToken = credential.refreshToken
+        self.tokenType = credential.tokenType
+        super.init()
     }
     
     /**
@@ -317,10 +280,10 @@ class OAuthCredential: NSObject, NSCoding {
      
      - Parameter identifier: The service identifier associated with the specified credential.
      
-     - Returns: Whether or not the credential was deleted from the keychain.
+     - Returns: A boolean value indicating the sucess of the operation.
      */
-    class func deleteCredentialWithIdentifier(_ identifier: String) -> Bool {
-        let queryDictionary = keychainQueryDictionaryWithIdentifier(identifier)
+    class func delete(withIdentifier identifier: String) -> Bool {
+        let queryDictionary = keychainQueryDictionary(withIdentifier: identifier)
         
         let status = SecItemDelete(queryDictionary as CFDictionary)
         
@@ -342,5 +305,11 @@ class OAuthCredential: NSObject, NSCoding {
         refreshToken = aDecoder.decodeObject(forKey: "refreshToken") as? String
         expiration = aDecoder.decodeObject(forKey: "expiration") as? Date
         super.init()
+    }
+}
+
+func += <K, V> (left: inout [K:V], right: [K:V]) {
+    for (k, v) in right {
+        left.updateValue(v, forKey: k)
     }
 }

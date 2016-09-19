@@ -7,18 +7,6 @@ import Alamofire
     import SafariServices
 #endif
 
-public protocol TraktDelegate: class {
-    /// Called when a user has successfully logged in.
-    func AuthenticationDidSucceed()
-    
-    /**
-     Called if a user cancels the auth process or if the requests fail.
-     
-     - Parameter error: The underlying error.
-     */
-    func AuthenticationDidFail(withError error: NSError)
-}
-
 open class TraktManager: NetworkManager {
     
     
@@ -29,7 +17,7 @@ open class TraktManager: NetworkManager {
     fileprivate var state: String!
     
     /// The delegate for the Trakt Authentication process.
-    open weak var delegate: TraktDelegate?
+    open weak var delegate: TraktManagerDelegate?
     
     /**
      Scrobbles current video.
@@ -42,22 +30,22 @@ open class TraktManager: NetworkManager {
      - Parameter completion:    Optional completion handler only called if an error is thrown.
      */
     open func scrobble(_ id: String, progress: Float, type: Trakt.MediaType, status: Trakt.WatchedStatus, completion: ((_ error: NSError) -> Void)? = nil) {
-        guard var credential = OAuthCredential.retrieveCredentialWithIdentifier("trakt") else {return}
+        guard var credential = OAuthCredential(identifier: "trakt") else {return}
         DispatchQueue.global(qos: .background).async {
             if credential.expired {
                 do {
-                    credential = try OAuthCredential(URLString: Trakt.Base + Trakt.Auth + Trakt.Token, refreshToken: credential.refreshToken!, clientID: Trakt.APIKey, clientSecret: Trakt.APISecret, useBasicAuthentication: false)!
+                    credential = try OAuthCredential(Trakt.base + Trakt.auth + Trakt.token, refreshToken: credential.refreshToken!, clientID: Trakt.apiKey, clientSecret: Trakt.apiSecret, useBasicAuthentication: false)
                 } catch let error as NSError {
                     DispatchQueue.main.async(execute: { completion?(error) })
                 }
             }
             var parameters = [String: Any]()
-            if type == .Movies {
+            if type == .movies {
                 parameters = ["movie": ["ids": ["imdb": id]], "progress": progress * 100.0]
             } else {
                 parameters = ["episode": ["ids": ["tvdb": Int(id)!]], "progress": progress * 100.0]
             }
-            self.manager.request(Trakt.Base + Trakt.Scrobble + "/\(status.rawValue)", method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: Trakt.Headers.Authorization(credential.accessToken)).validate().responseJSON(completionHandler: { response in
+            self.manager.request(Trakt.base + Trakt.scrobble + "/\(status.rawValue)", method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: Trakt.Headers.Authorization(credential.accessToken)).validate().responseJSON(completionHandler: { response in
                 if let error = response.result.error {
                     DispatchQueue.main.async(execute: { completion?(error as NSError) })
                 }
@@ -75,7 +63,7 @@ open class TraktManager: NetworkManager {
      - Parameter completion:    The completion handler for the request containing an optional largeImageUrl, optional tvdbId and optional imdbId.
      */
     open func getEpisodeMetadata(_ showId: String, episodeNumber: Int, seasonNumber: Int, completion: @escaping (_ largeImageUrl: String?, _ tvdbId: Int?, _ imdbId: String?, _ error: NSError?) -> Void) {
-        self.manager.request(Trakt.Base + Trakt.Shows +  "/\(showId)" + Trakt.Seasons + "/\(seasonNumber)" + Trakt.Episodes + "/\(episodeNumber)", parameters: Trakt.Parameters.ExtendedImages, headers: Trakt.Headers.Default).validate().responseJSON { response in
+        self.manager.request(Trakt.base + Trakt.shows +  "/\(showId)" + Trakt.seasons + "/\(seasonNumber)" + Trakt.episodes + "/\(episodeNumber)", parameters: Trakt.Parameters.extendedImages, headers: Trakt.Headers.Default).validate().responseJSON { response in
             if let responseObject = response.result.value as? [String: [String: AnyObject]] {
                 let image = responseObject["images"]?["screenshot"]?["full"] as? String
                 let imdbId = responseObject["ids"]?["imdb"] as? String
@@ -95,21 +83,21 @@ open class TraktManager: NetworkManager {
      - Parameter completion:        The completion handler for the request containing an array of either imdbIds or tvdbIds depending on the type selected and an optional error.
      */
     open func getWatched(forMediaOfType type: Trakt.MediaType, completion:@escaping (_ ids: [String], _ error: NSError?) -> Void) {
-        guard var credential = OAuthCredential.retrieveCredentialWithIdentifier("trakt") else { return}
+        guard var credential = OAuthCredential(identifier: "trakt") else { return}
         DispatchQueue.global(qos: .userInitiated).async {
             if credential.expired {
                 do {
-                    credential = try OAuthCredential(URLString: Trakt.Base + Trakt.Auth + Trakt.Token, refreshToken: credential.refreshToken!, clientID: Trakt.APIKey, clientSecret: Trakt.APISecret, useBasicAuthentication: false)!
+                    credential = try OAuthCredential(Trakt.base + Trakt.auth + Trakt.token, refreshToken: credential.refreshToken!, clientID: Trakt.apiKey, clientSecret: Trakt.apiSecret, useBasicAuthentication: false)
                 } catch let error as NSError {
                     DispatchQueue.main.async(execute: { completion([String](), error) })
                 }
             }
-            let queue = DispatchQueue(label: "com.popcorn-time.response.queue", attributes: .concurrent)
-            self.manager.request(Trakt.Base + Trakt.Sync + Trakt.Watched + "/\(type.rawValue)", headers: Trakt.Headers.Authorization(credential.accessToken)).validate().responseJSON(queue: queue, options: .allowFragments, completionHandler: { response in
+            let queue = DispatchQueue(label: "com.popcorntimetv.popcornkit.response.queue", attributes: .concurrent)
+            self.manager.request(Trakt.base + Trakt.sync + Trakt.watched + "/\(type.rawValue)", headers: Trakt.Headers.Authorization(credential.accessToken)).validate().responseJSON(queue: queue, options: .allowFragments, completionHandler: { response in
                 guard let responseObject = response.result.value as? [String: [String: [String: AnyObject]]] else { completion([String](), response.result.error as NSError?); return}
                 var ids = [String]()
                 for (_, item) in responseObject {
-                    if type == .Movies { ids.append(item["movie"]?["ids"]?["imdb"] as! String); continue}
+                    if type == .movies { ids.append(item["movie"]?["ids"]?["imdb"] as! String); continue}
                     var tvdbIds = [String](); let showImdbId = item["show"]?["ids"]?["imdb"] as! String
                     for (_, season) in item["seasons"]! {
                         let seasonNumber = season["number"] as! Int
@@ -141,16 +129,16 @@ open class TraktManager: NetworkManager {
      - Parameter completion:    The completion handler for the request containing a dictionary of either imdbIds or tvdbIds depending on the type selected as keys and the users corrisponding watched progress as values and an optional error. Eg. ["tt1431045": 0.5] means you have watched half of Deadpool.
      */
     open func getPlaybackProgress(_ type: Trakt.MediaType, completion: @escaping (_ progressDict: [String: Float], _ error: NSError?) -> Void) {
-        guard var credential = OAuthCredential.retrieveCredentialWithIdentifier("trakt") else {return}
+        guard var credential = OAuthCredential(identifier: "trakt") else {return}
         DispatchQueue.global(qos: .userInitiated).async {
             if credential.expired {
                 do {
-                    credential = try OAuthCredential(URLString: Trakt.Base + Trakt.Auth + Trakt.Token, refreshToken: credential.refreshToken!, clientID: Trakt.APIKey, clientSecret: Trakt.APISecret, useBasicAuthentication: false)!
+                    credential = try OAuthCredential(Trakt.base + Trakt.auth + Trakt.token, refreshToken: credential.refreshToken!, clientID: Trakt.apiKey, clientSecret: Trakt.apiSecret, useBasicAuthentication: false)
                 } catch let error as NSError {
                     DispatchQueue.main.async(execute: { completion([String: Float](), error) })
                 }
             }
-            self.manager.request(Trakt.Base + Trakt.Sync + Trakt.Playback + "/\(type.rawValue)", headers: Trakt.Headers.Authorization(credential.accessToken)).validate().responseJSON { response in
+            self.manager.request(Trakt.base + Trakt.sync + Trakt.playback + "/\(type.rawValue)", headers: Trakt.Headers.Authorization(credential.accessToken)).validate().responseJSON { response in
                 guard let responseObject = response.result.value as? [String: AnyObject] else { completion([String: Float](), response.result.error as NSError?); return }
                 var progressDict = [String: Float]()
                 for (_, item) in responseObject {
@@ -174,22 +162,22 @@ open class TraktManager: NetworkManager {
      - Parameter completion:    An optional completion handler called only if an error is thrown.
      */
     open func removeItemFromHistory(_ type: Trakt.MediaType, id: String, completion: ((_ error: NSError) -> Void)? = nil) {
-        guard var credential = OAuthCredential.retrieveCredentialWithIdentifier("trakt") else {return}
+        guard var credential = OAuthCredential(identifier: "trakt") else {return}
         DispatchQueue.global(qos: .userInitiated).async {
             if credential.expired {
                 do {
-                    credential = try OAuthCredential(URLString: Trakt.Base + Trakt.Auth + Trakt.Token, refreshToken: credential.refreshToken!, clientID: Trakt.APIKey, clientSecret: Trakt.APISecret, useBasicAuthentication: false)!
+                    credential = try OAuthCredential(Trakt.base + Trakt.auth + Trakt.token, refreshToken: credential.refreshToken!, clientID: Trakt.apiKey, clientSecret: Trakt.apiSecret, useBasicAuthentication: false)
                 } catch let error as NSError {
                     DispatchQueue.main.async(execute: {completion?(error) })
                 }
             }
             var parameters = [String: Any]()
-            if type == .Movies {
+            if type == .movies {
                 parameters = ["movies": [["ids": ["imdb": id]]]]
-            } else if type == .Episodes {
+            } else if type == .episodes {
                 parameters = ["episodes": [["ids": ["tvdb": Int(id)!]]]]
             }
-            self.manager.request(Trakt.Base + Trakt.Sync + Trakt.History + Trakt.Remove, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: Trakt.Headers.Authorization(credential.accessToken)).validate().responseJSON(completionHandler: { response in
+            self.manager.request(Trakt.base + Trakt.sync + Trakt.history + Trakt.remove, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: Trakt.Headers.Authorization(credential.accessToken)).validate().responseJSON(completionHandler: { response in
                 if let error = response.result.error {DispatchQueue.main.async(execute: {completion?(error as NSError)})}
             })
         }
@@ -204,7 +192,7 @@ open class TraktManager: NetworkManager {
      - Parameter completion:        The completion handler for the request containing an array of actors, array of crews and an optional error.
      */
     open func getPeople(forMediaOfType type: Trakt.MediaType, id: String, completion: @escaping (_ actors: [Actor], _ crews: [Crew], _ error: NSError?) -> Void) {
-        self.manager.request(Trakt.Base + "/\(type.rawValue)/\(id)" + Trakt.People, parameters: Trakt.Parameters.ExtendedImages, headers: Trakt.Headers.Default).validate().responseJSON { response in
+        self.manager.request(Trakt.base + "/\(type.rawValue)/\(id)" + Trakt.people, parameters: Trakt.Parameters.extendedImages, headers: Trakt.Headers.Default).validate().responseJSON { response in
             guard let responseObject = response.result.value as? [String: Any],
                 let people = responseObject["crew"] as? [String: [AnyObject]],
                 let cast = responseObject["cast"] as? [[String: Any]] else { completion([Actor](), [Crew](), response.result.error as NSError?); return}
@@ -227,7 +215,7 @@ open class TraktManager: NetworkManager {
      - Parameter completion:    The requests completion handler containing array of related movies and an optional error.
      */
     open func getRelated<T: Media>(_ media: T, completion: @escaping (_ media: [T], _ error: NSError?) -> Void) {
-        self.manager.request(Trakt.Base + (media is Movie ? Trakt.Movies : Trakt.Shows) + "/\(media.id)" + Trakt.Related, parameters: Trakt.Parameters.ExtendedAll, headers: Trakt.Headers.Default).validate().responseJSON { response in
+        self.manager.request(Trakt.base + (media is Movie ? Trakt.movies : Trakt.shows) + "/\(media.id)" + Trakt.related, parameters: Trakt.Parameters.extendedAll, headers: Trakt.Headers.Default).validate().responseJSON { response in
             guard let value = response.result.value else { completion([T](), response.result.error as NSError?); return }
             completion(Mapper<T>(context: TraktContext()).mapArray(JSONObject: value) ?? [T](), nil)
         }
@@ -242,8 +230,8 @@ open class TraktManager: NetworkManager {
      - Parameter completion:        The requests completion handler containing array of movies and an optional error.
      */
     open func getMediaCredits<T: Media>(forPersonWithId id: String, media: T.Type, completion: @escaping (_ media: [T], _ error: NSError?) -> Void) {
-        self.manager.request(Trakt.Base + Trakt.People + "/\(id)" + (media is Movie.Type ? Trakt.Movies : Trakt.Shows), parameters: Trakt.Parameters.ExtendedAll, headers: Trakt.Headers.Default).validate().responseJSON { response in
-            guard let responseObject = response.result.value as? [String: Any] else { completion([T](), response.result.error as NSError?); return }
+        self.manager.request(Trakt.base + Trakt.people + "/\(id)" + (media is Movie.Type ? Trakt.movies : Trakt.shows), parameters: Trakt.Parameters.extendedAll, headers: Trakt.Headers.Default).validate().responseJSON { response in
+            guard let responseObject = response.result.value as? [String: AnyObject] else { completion([T](), response.result.error as NSError?); return }
             var movies = [T]()
             if let people = responseObject["crew"] as? [String: [[String: Any]]] {
                 for (_, item) in people {
@@ -264,16 +252,51 @@ struct TraktContext: MapContext {}
 
 // MARK: Trakt OAuth
 
+public protocol TraktManagerDelegate: class {
+    /// Called when a user has successfully logged in.
+    func AuthenticationDidSucceed()
+    
+    /**
+     Called if a user cancels the auth process or if the requests fail.
+     
+     - Parameter error: The underlying error.
+     */
+    func AuthenticationDidFail(withError error: NSError)
+}
+
 extension TraktManager {
+    
+    /**
+     First part of the Trakt authentication process.
+     
+     - Returns: A login view controller to be presented.
+     */
     public func login() -> UIViewController {
         #if os(iOS)
             state = String.random(15)
-            return SFSafariViewController(url: URL(string: Trakt.Base + Trakt.Auth + "/authorize?client_id=" + Trakt.APIKey + "&redirect_uri=PopcornTime%3A%2F%2Ftrakt&response_type=code&state=\(state)")!)
+            return SFSafariViewController(url: URL(string: Trakt.base + Trakt.auth + "/authorize?client_id=" + Trakt.apiKey + "&redirect_uri=PopcornTime%3A%2F%2Ftrakt&response_type=code&state=\(state)")!)
         #else
-            return UIViewController()
+            return TraktAuthenticationViewController(nibName: "TraktAuthenticationViewController", bundle: nil)
         #endif
     }
     
+    /**
+     Generate code to authenticate device on web.
+     
+     - Parameter completion: The completion handler for the request containing the code for the user to enter to the validation url (`https://trakt.tv/activate/authorize`), the code for the device to get the access token, the expiery date of the displat code and the time interval that the program is to check whether the user has authenticated and an optional error if request fails.
+     */
+    internal func generateCode(completion: @escaping (_ displayCode: String?, _ deviceCode: String?, _ expires: Date?, _ interval: TimeInterval?, _ error: NSError?) -> Void) {
+        self.manager.request(Trakt.base + Trakt.auth + Trakt.device + Trakt.code, method: .post, parameters: ["client_id": Trakt.apiKey]).validate().responseJSON { (response) in
+            guard let value = response.result.value as? [String: AnyObject], let displayCode = value["user_code"] as? String, let deviceCode = value["device_code"] as? String, let expire = value["expires_in"] as? Int, let interval = value["interval"]  as? Int else { completion(nil, nil, nil, nil, response.result.error as NSError?); return }
+            completion(displayCode, deviceCode, Date().addingTimeInterval(Double(expire)), Double(interval), nil)
+        }
+    }
+    
+    /**
+     Second part of the authentication process.
+     
+     - Parameter url: The redirect URI recieved from step 1.
+     */
     public func authenticate(_ url: URL) {
         defer { state = nil }
         
@@ -281,22 +304,19 @@ extension TraktManager {
             let code = query["code"],
             query["state"] == state
             else {
-                delegate?.AuthenticationDidFail(withError: NSError(domain: "com.popcornkit.error", code: -1, userInfo: [NSLocalizedDescriptionKey: "An unknown error occured."]))
+                delegate?.AuthenticationDidFail(withError: NSError(domain: "com.popcorntimetv.popcornkit.error", code: -1, userInfo: [NSLocalizedDescriptionKey: "An unknown error occured."]))
                 return
         }
         
         DispatchQueue.global(qos: .default).async {
             do {
-                guard let credential = try OAuthCredential(URLString: Trakt.Base + Trakt.Auth + Trakt.Token,
+                let credential = try OAuthCredential(Trakt.base + Trakt.auth + Trakt.token,
                                                            code: code,
                                                            redirectURI: "PopcornTime://trakt",
-                                                           clientID: Trakt.APIKey,
-                                                           clientSecret: Trakt.APISecret,
+                                                           clientID: Trakt.apiKey,
+                                                           clientSecret: Trakt.apiSecret,
                                                            useBasicAuthentication: false)
-                    else {
-                        throw NSError(domain: "com.popcornkit.error", code: -1, userInfo: [NSLocalizedDescriptionKey: "An unknown error occured."])
-                }
-                OAuthCredential.storeCredential(credential, identifier: "trakt")
+                credential.store(withIdentifier: "trakt")
                 self.delegate?.AuthenticationDidSucceed()
             } catch let error as NSError {
                 self.delegate?.AuthenticationDidFail(withError: error)
