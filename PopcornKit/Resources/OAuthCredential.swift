@@ -167,7 +167,7 @@ class OAuthCredential: NSObject, NSCoding {
         var headers: [String: String]?
         var parameters = parameters
         if useBasicAuthentication {
-            headers = ["Authorization": "Basic \("\(clientID):\(clientSecret)".data(using: String.Encoding.utf8)!.base64EncodedString(options: NSData.Base64EncodingOptions.init(rawValue: 0)))"]
+            headers = ["Authorization": "Basic \("\(clientID):\(clientSecret)".data(using: .utf8)!.base64EncodedString())"]
         } else {
             parameters["client_id"] = clientID
             parameters["client_secret"] = clientSecret

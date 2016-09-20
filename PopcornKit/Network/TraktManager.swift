@@ -252,16 +252,16 @@ struct TraktContext: MapContext {}
 
 // MARK: Trakt OAuth
 
-public protocol TraktManagerDelegate: class {
+@objc public protocol TraktManagerDelegate: class {
     /// Called when a user has successfully logged in.
-    func AuthenticationDidSucceed()
+    @objc optional func authenticationDidSucceed()
     
     /**
      Called if a user cancels the auth process or if the requests fail.
      
      - Parameter error: The underlying error.
      */
-    func AuthenticationDidFail(withError error: NSError)
+    @objc optional func authenticationDidFail(withError error: NSError)
 }
 
 extension TraktManager {
@@ -271,13 +271,31 @@ extension TraktManager {
      
      - Returns: A login view controller to be presented.
      */
-    public func login() -> UIViewController {
+    public func loginViewController() -> UIViewController {
         #if os(iOS)
             state = String.random(15)
             return SFSafariViewController(url: URL(string: Trakt.base + Trakt.auth + "/authorize?client_id=" + Trakt.apiKey + "&redirect_uri=PopcornTime%3A%2F%2Ftrakt&response_type=code&state=\(state)")!)
         #else
             return TraktAuthenticationViewController(nibName: "TraktAuthenticationViewController", bundle: nil)
         #endif
+    }
+    
+    /**
+     Logout of Trakt.
+     
+     - Returns: Boolean value indicating the sucess of the operation.
+     */
+    @discardableResult public func logout() -> Bool {
+        return OAuthCredential.delete(withIdentifier: "trakt")
+    }
+    
+    /**
+     Checks if user is authenticated with trakt.
+     
+     - Returns: Boolean value indicating the signed in status of the user.
+     */
+    public func isSignedIn() -> Bool {
+        return OAuthCredential(identifier: "trakt") != nil
     }
     
     /**
@@ -304,7 +322,7 @@ extension TraktManager {
             let code = query["code"],
             query["state"] == state
             else {
-                delegate?.AuthenticationDidFail(withError: NSError(domain: "com.popcorntimetv.popcornkit.error", code: -1, userInfo: [NSLocalizedDescriptionKey: "An unknown error occured."]))
+                delegate?.authenticationDidFail?(withError: NSError(domain: "com.popcorntimetv.popcornkit.error", code: -1, userInfo: [NSLocalizedDescriptionKey: "An unknown error occured."]))
                 return
         }
         
@@ -317,9 +335,9 @@ extension TraktManager {
                                                            clientSecret: Trakt.apiSecret,
                                                            useBasicAuthentication: false)
                 credential.store(withIdentifier: "trakt")
-                self.delegate?.AuthenticationDidSucceed()
+                self.delegate?.authenticationDidSucceed?()
             } catch let error as NSError {
-                self.delegate?.AuthenticationDidFail(withError: error)
+                self.delegate?.authenticationDidFail?(withError: error)
             }
         }
     }

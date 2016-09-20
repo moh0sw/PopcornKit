@@ -4,7 +4,7 @@ import Foundation
 /// Class for managing a users watchlist.
 open class WatchlistManager {
     
-    fileprivate var currentType: Trakt.MediaType
+    private var currentType: Trakt.MediaType
     
     /// Creates new instance of WatchlistManager class with type of Movies.
     open static let movie = WatchlistManager(type: .movies)
@@ -15,7 +15,7 @@ open class WatchlistManager {
     /// Creates new instance of WatchlistManager class with type of Shows.
     static let show = WatchlistManager(type: .shows)
     
-    fileprivate init(type: Trakt.MediaType) {
+    private init(type: Trakt.MediaType) {
         currentType = type
     }
     
@@ -32,7 +32,7 @@ open class WatchlistManager {
      
      - Parameter id:    The imdbId or tvdbId of the media.
      */
-    func add(_ id: String) {
+    open func add(_ id: String) {
         TraktManager.shared.scrobble(id, progress: 1, type: currentType, status: .finished)
         var array = UserDefaults.standard.object(forKey: "Watchlist") as? [String]
         array = array ?? [String]()
@@ -44,7 +44,7 @@ open class WatchlistManager {
      
      - Parameter id: The Imdb identification code of the episode or tv.
      */
-    func remove(_ id: String) {
+    open func remove(_ id: String) {
         TraktManager.shared.removeItemFromHistory(currentType, id: id)
         if var array = UserDefaults.standard.object(forKey: "Watchlist") as? [String] {
             for (index, item) in array.enumerated() {
@@ -62,7 +62,7 @@ open class WatchlistManager {
      
      - Returns: Boolean indicating if movie or episode is in watchlist.
      */
-    func isWatched(_ id: String) -> Bool {
+    open func isWatched(_ id: String) -> Bool {
         if let array = UserDefaults.standard.object(forKey: "Watchlist") as? [String] {
             return array.contains(id)
         }
@@ -73,7 +73,7 @@ open class WatchlistManager {
      
      - Returns: Completion block called twice; first returns locally stored watchlist (may be out of date), second time returns the updated watchlist from Trakt.
      */
-    func getWatched(_ completion:@escaping () -> Void) {
+    open func getWatched(_ completion:@escaping () -> Void) {
         var array = UserDefaults.standard.object(forKey: "Watchlist") as? [String]
         array = array ?? [String]()
         completion()
@@ -88,7 +88,7 @@ open class WatchlistManager {
     /**
      Gets progress locally first and then from Trakt.
      */
-    func getProgress() {
+    open func getProgress() {
         var progressDict = UserDefaults.standard.object(forKey: "VideoProgress") as? [String: Float]
         progressDict = progressDict ?? [String: Float]()
         TraktManager.shared.getPlaybackProgress(currentType) { (dict, error) in
@@ -105,7 +105,7 @@ open class WatchlistManager {
      
      - Returns: The progress (if any) of the movie or episode.
      */
-    func currentProgress(_ id: String) -> Float {
+    open func currentProgress(_ id: String) -> Float {
         if let dict = UserDefaults.standard.object(forKey: "VideoProgress") as? [String: Float],
             let progress = dict[id] {
             return progress

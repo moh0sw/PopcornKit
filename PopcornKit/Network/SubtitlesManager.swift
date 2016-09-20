@@ -10,11 +10,11 @@ open class SubtitlesManager: NetworkManager {
     
     // MARK: - Private Variables.
     
-    fileprivate let baseURL = "http://api.opensubtitles.org:80/xml-rpc"
-    fileprivate let secureBaseURL = "https://api.opensubtitles.org:443/xml-rpc"
-    fileprivate let userAgent = "Popcorn Time v1"
-    fileprivate var token: String?
-    var protectionSpace: URLProtectionSpace {
+    private let baseURL = "http://api.opensubtitles.org:80/xml-rpc"
+    private let secureBaseURL = "https://api.opensubtitles.org:443/xml-rpc"
+    private let userAgent = "Popcorn Time v1"
+    private var token: String?
+    public var protectionSpace: URLProtectionSpace {
         let url = URL(string: secureBaseURL)!
         return URLProtectionSpace(host: url.host!, port: (url as NSURL).port!.intValue, protocol: url.scheme, realm: nil, authenticationMethod: NSURLAuthenticationMethodHTTPBasic)
     }

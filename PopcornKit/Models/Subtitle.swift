@@ -4,9 +4,9 @@ import Foundation
 import ObjectMapper
 
 public struct Subtitle: Mappable {
-    var language: String!
-    var link: String!
-    var ISO639: String!
+    public var language: String!
+    public var link: String!
+    public var ISO639: String!
     
     public init(language: String, link: String, ISO639: String) {
         self.language = language
