@@ -48,7 +48,7 @@ public class TraktAuthenticationViewController: UIViewController {
                     let credential = try OAuthCredential(Trakt.base + Trakt.auth + Trakt.device + Trakt.token, parameters: ["code": deviceCode], clientID: Trakt.apiKey, clientSecret: Trakt.apiSecret, useBasicAuthentication: false)
                     credential.store(withIdentifier: "trakt")
                     self?.dismiss(animated: true, completion: nil)
-                    TraktManager.shared.delegate?.AuthenticationDidSucceed()
+                    TraktManager.shared.delegate?.authenticationDidSucceed?()
                 } catch { }
             }
         }
