@@ -5,7 +5,7 @@ source 'https://github.com/angryDuck2/CocoaSpecs'
 
 def pods
  pod 'Alamofire', '~> 4.0.0'
- pod 'ObjectMapper', '~> 2.0.0'
+ pod 'ObjectMapper', :git => 'https://github.com/Hearst-DD/ObjectMapper.git'
  pod 'AlamofireXMLRPC', :git => 'https://github.com/PopcornTimeTV/AlamofireXMLRPC.git'
 end
 
