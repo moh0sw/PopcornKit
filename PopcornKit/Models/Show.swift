@@ -3,7 +3,7 @@
 import Foundation
 import ObjectMapper
 
-public struct Show: Media, Equatable {
+public struct Show: Media {
     
     public var id: String!
     public var slug: String!
@@ -74,6 +74,6 @@ public struct Show: Media, Equatable {
     }
 }
 
-public func == (lhs: Show, rhs: Show) -> Bool {
+public func ==(lhs: Show, rhs: Show) -> Bool {
     return lhs.id == rhs.id
 }

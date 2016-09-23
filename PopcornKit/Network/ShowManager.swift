@@ -39,7 +39,7 @@ open class ShowManager: NetworkManager {
         case war = "War"
         case western = "Western"
         
-        static let array = [all, action, adventure, animation, comedy, crime, disaster, documentary, drama, family, fanFilm, fantasy, filmNoir, history, holiday, horror, indie, music, mystery, road, romance, sciFi, short, sport, sportingEvent, suspense, thriller, war, western]
+        public static let array = [all, action, adventure, animation, comedy, crime, disaster, documentary, drama, family, fanFilm, fantasy, filmNoir, history, holiday, horror, indie, music, mystery, road, romance, sciFi, short, sport, sportingEvent, suspense, thriller, war, western]
     }
     
     /// Possible filters used in API call.
@@ -51,9 +51,9 @@ open class ShowManager: NetworkManager {
         case alphabet = "name"
         case trending = "trending"
         
-        static let array = [trending, popularity, rating, date, year, alphabet]
+        public static let array = [trending, popularity, rating, date, year, alphabet]
         
-        var string: String {
+        public var string: String {
             switch self {
             case .popularity:
                 return "Popular"

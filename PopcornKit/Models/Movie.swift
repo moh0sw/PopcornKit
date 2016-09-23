@@ -3,7 +3,7 @@
 import Foundation
 import ObjectMapper
 
-public struct Movie: Media, Equatable {
+public struct Movie: Media {
 
     public var id: String!
     public var slug: String! {get {return "\(title.slugged)-\(year)"} set {}}
@@ -77,7 +77,6 @@ public struct Movie: Media, Equatable {
         }
         torrents.sort(by: <)
     }
-
 }
 
 public func ==(lhs: Movie, rhs: Movie) -> Bool {

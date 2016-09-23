@@ -3,7 +3,7 @@
 import Foundation
 import ObjectMapper
 
-public struct Subtitle: Mappable {
+public struct Subtitle: Mappable, Equatable {
     public var language: String!
     public var link: String!
     public var ISO639: String!
@@ -23,5 +23,8 @@ public struct Subtitle: Mappable {
         self.link <- map["SubDownloadLink"]
         self.ISO639 <- map["ISO639"]
     }
-    
+}
+
+public func ==(lhs: Subtitle, rhs: Subtitle) -> Bool {
+    return lhs.link == rhs.link
 }

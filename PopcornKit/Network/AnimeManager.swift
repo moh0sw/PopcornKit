@@ -52,7 +52,7 @@ open class AnimeManager: NetworkManager {
         case vampire = "Vampire"
         case yuri = "Yuri"
         
-        static let array = [all, action, adventure, comedy, dementia, demons, drama, ecchi, fantasy, game, genderBender, gore, harem, historical, horror, kids, magic, mahouShoujo, mahouShounen, martialArts, mecha, military, music, mystery, parody, police, psychological, racing, romance, samurai, school, sciFi, shounenAi, shoujoAi, sliceOfLife, space, sports, supernatural, superPower, thriller, vampire, yuri]
+        public static let array = [all, action, adventure, comedy, dementia, demons, drama, ecchi, fantasy, game, genderBender, gore, harem, historical, horror, kids, magic, mahouShoujo, mahouShounen, martialArts, mecha, military, music, mystery, parody, police, psychological, racing, romance, samurai, school, sciFi, shounenAi, shoujoAi, sliceOfLife, space, sports, supernatural, superPower, thriller, vampire, yuri]
     }
     
     /// Possible filters used in API call.
@@ -63,9 +63,9 @@ open class AnimeManager: NetworkManager {
         case rating = "rating"
         case alphabet = "name"
         
-        static let array = [popularity, rating, date, year, alphabet]
+        public static let array = [popularity, rating, date, year, alphabet]
         
-        var string: String {
+        public var string: String {
             switch self {
             case .popularity:
                 return "Popular"

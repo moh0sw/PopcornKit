@@ -3,7 +3,7 @@
 import Foundation
 import ObjectMapper
 
-public struct Episode: Media, Equatable {
+public struct Episode: Media {
     
     public var firstAirDate: Date!
     public var title: String!
@@ -48,9 +48,8 @@ public struct Episode: Media, Equatable {
         }
         torrents.sort(by: <)
     }
-    
 }
 
 public func ==(lhs: Episode, rhs: Episode) -> Bool {
-    return lhs.season == rhs.season && lhs.episode == rhs.episode
+    return lhs.id == rhs.id
 }
