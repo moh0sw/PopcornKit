@@ -15,8 +15,8 @@ Pod::Spec.new do |s|
   s.frameworks = 'UIKit', 'Foundation', 'SafariServices'
   s.module_name = 'PopcornKit'
 
-  s.dependency 'Alamofire', '~> 4.0.0'
-  s.dependency 'ObjectMapper', :git => 'https://github.com/Hearst-DD/ObjectMapper.git'
-  s.dependency 'AlamofireXMLRPC', :git => 'https://github.com/PopcornTimeTV/AlamofireXMLRPC.git'
-  s.ios.dependency 'SRT2VTT', :git => 'https://github.com/PopcornTimeTV/AlamofireXMLRPC.git'
+  s.dependency 'Alamofire'
+  s.dependency 'ObjectMapper'
+  s.dependency 'AlamofireXMLRPC'
+  s.ios.dependency 'SRT2VTT'
 end
