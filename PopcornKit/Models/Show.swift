@@ -31,7 +31,6 @@ public struct Show: Media, Equatable {
     }
     public var largeCoverImage: String?
     
-    public var directors: [Crew] {return crew.filter({$0.roleType == .Director})}
     public var crew = [Crew]()
     public var actors = [Actor]()
     public var episodes = [Episode]()
@@ -64,6 +63,12 @@ public struct Show: Media, Equatable {
         self.runtime <- map["runtime"]
         self.genres <- map["genres"]
         self.episodes <- map["episodes"]
+        var episodes = [Episode]()
+        for var episode in self.episodes {
+            episode.show = self
+            episodes.append(episode)
+        }
+        self.episodes = episodes
         self.runtime <- map["runtime"]
         self.episodes.sort(by: { $0.episode < $1.episode })
     }

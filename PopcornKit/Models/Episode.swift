@@ -12,6 +12,7 @@ public struct Episode: Media, Equatable {
     public var slug: String! {get {return title.slugged} set {}}
     public var season: Int!
     public var episode: Int!
+    public var show: Show!
     
     public var smallBackgroundImage: String? {
         return largeBackgroundImage?.replacingOccurrences(of: "original", with: "thumb")
@@ -20,13 +21,6 @@ public struct Episode: Media, Equatable {
         return largeBackgroundImage?.replacingOccurrences(of: "original", with: "medium")
     }
     public var largeBackgroundImage: String?
-    public var smallCoverImage: String? {
-        return largeCoverImage?.replacingOccurrences(of: "original", with: "thumb")
-    }
-    public var mediumCoverImage: String? {
-        return largeCoverImage?.replacingOccurrences(of: "original", with: "medium")
-    }
-    public var largeCoverImage: String?
     
     public var torrents = [Torrent]()
     public var currentTorrent: Torrent!
