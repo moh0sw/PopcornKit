@@ -3,7 +3,7 @@
 import Foundation
 import ObjectMapper
 
-public struct Episode: Media {
+public struct Episode: Media, Equatable {
     
     public var firstAirDate: Date!
     public var title: String!

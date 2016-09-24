@@ -3,7 +3,7 @@
 import Foundation
 import ObjectMapper
 
-public struct Show: Media {
+public struct Show: Media, Equatable {
     
     public var id: String!
     public var slug: String!

@@ -3,7 +3,7 @@
 import Foundation
 import ObjectMapper
 
-public struct Movie: Media {
+public struct Movie: Media, Equatable {
 
     public var id: String!
     public var slug: String! {get {return "\(title.slugged)-\(year)"} set {}}

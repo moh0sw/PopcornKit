@@ -3,7 +3,7 @@
 import Foundation
 import ObjectMapper
 
-public protocol Media: Mappable, Equatable {
+public protocol Media: Mappable {
     var title: String! { get set }
     var summary: String! { get set }
     var smallBackgroundImage: String? { get }
