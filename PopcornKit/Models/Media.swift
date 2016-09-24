@@ -5,7 +5,7 @@ import ObjectMapper
 
 public protocol Media: Mappable {
     var title: String! { get set }
-    var summary: String! { get set }
+    var summary: String? { get set }
     var smallBackgroundImage: String? { get }
     var mediumBackgroundImage: String? { get }
     var largeBackgroundImage: String? { get set }

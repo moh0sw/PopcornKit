@@ -7,7 +7,7 @@ public struct Episode: Media, Equatable {
     
     public var firstAirDate: Date!
     public var title: String!
-    public var summary: String!
+    public var summary: String?
     public var id: String!
     public var slug: String! {get {return title.slugged} set {}}
     public var season: Int!
@@ -23,8 +23,8 @@ public struct Episode: Media, Equatable {
     public var largeBackgroundImage: String?
     
     public var torrents = [Torrent]()
-    public var currentTorrent: Torrent!
-    public var subtitles: [Subtitle]?
+    public var currentTorrent: Torrent?
+    public var subtitles = [Subtitle]()
     public var currentSubtitle: Subtitle?
     
     public init?(map: Map) {
@@ -33,7 +33,7 @@ public struct Episode: Media, Equatable {
     
     public mutating func mapping(map: Map) {
         self.firstAirDate <- (map["first_aired"], DateTransform())
-        self.summary <- map["overview"]; summary = summary ?? "No synopsis available"
+        self.summary <- map["overview"]
         self.episode <- map["episode"]
         self.season <- map["season"]
         self.title <- map["title"]; title = title ?? "Episode \(episode)"

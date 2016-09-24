@@ -11,8 +11,7 @@ public struct Movie: Media, Equatable {
     public var year: String!
     public var rating: Float!
     public var runtime: String!
-    public var genres: [String]!
-    public var summary: String!
+    public var summary: String?
     public var trailer: String?
     public var trailerCode: String? {
         return trailer?.sliceFrom("?v=", to: "")
@@ -37,9 +36,10 @@ public struct Movie: Media, Equatable {
     public var crew = [Crew]()
     public var actors = [Actor]()
     public var torrents = [Torrent]()
-    public var currentTorrent: Torrent!
-    public var subtitles: [Subtitle]?
+    public var currentTorrent: Torrent?
+    public var subtitles = [Subtitle]()
     public var currentSubtitle: Subtitle?
+    public var genres = [String]()
 
     public init?(map: Map) {
         guard (map["ids.imdb"].currentValue != nil || map["imdb_id"].currentValue != nil) && map["title"].currentValue != nil && map["year"].currentValue != nil && (map["rating"].currentValue != nil || map["rating.percentage"].currentValue != nil) && map["runtime"].currentValue != nil && map["certification"].currentValue != nil && map["genres"].currentValue != nil && (map["overview"].currentValue != nil || map["synopsis"].currentValue != nil) else {return nil}

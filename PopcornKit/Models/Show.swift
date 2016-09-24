@@ -10,11 +10,12 @@ public struct Show: Media, Equatable {
     public var title: String!
     public var year: String!
     public var rating: Float!
-    public var runtime: String!
-    public var genres: [String]!
-    public var summary: String!
-    public var status: String!
-    public var numberOfSeasons: Int!
+    public var runtime: String?
+    public var summary: String?
+    public var status: String?
+    public var seasonNumbers: [Int] {
+        return Array(Set(episodes.map({$0.season})))
+    }
     
     public var smallBackgroundImage: String? {
         return largeBackgroundImage?.replacingOccurrences(of: "original", with: "thumb")
@@ -34,6 +35,7 @@ public struct Show: Media, Equatable {
     public var crew = [Crew]()
     public var actors = [Actor]()
     public var episodes = [Episode]()
+    public var genres = [String]()
     
     public init?(map: Map) {
         guard (map["imdb_id"].currentValue != nil || map["ids.imdb"].currentValue != nil || map["_id"].currentValue != nil) && map["title"].currentValue != nil && map["year"].currentValue != nil && (map["slug"].currentValue != nil || map["ids.slug"].currentValue != nil) && (map["rating"].currentValue != nil || map["rating.percentage"].currentValue != nil) else {return nil}
@@ -59,17 +61,16 @@ public struct Show: Media, Equatable {
         self.title <- map["title"]
         self.year <- map["year"]
         self.status <- map["status"]
-        self.numberOfSeasons <- map["num_seasons"]
         self.runtime <- map["runtime"]
         self.genres <- map["genres"]
         self.episodes <- map["episodes"]
+        self.runtime <- map["runtime"]
         var episodes = [Episode]()
         for var episode in self.episodes {
             episode.show = self
             episodes.append(episode)
         }
         self.episodes = episodes
-        self.runtime <- map["runtime"]
         self.episodes.sort(by: { $0.episode < $1.episode })
     }
 }
