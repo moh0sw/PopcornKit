@@ -18,5 +18,5 @@ Pod::Spec.new do |s|
   s.dependency 'Alamofire'
   s.dependency 'ObjectMapper'
   s.dependency 'AlamofireXMLRPC'
-  s.ios.dependency 'SRT2VTT'
+  s.ios.dependency 'SRT2VTT', :git => 'https://github.com/PopcornTimeTV/AlamofireXMLRPC.git'
 end
